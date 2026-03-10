@@ -136,10 +136,10 @@ This plan defines a standalone Go library for reading and normalizing CityGML da
 
 ## Phase 8 — Validation layer
 
-- [ ] Add structural validation API separate from decode
-- [ ] Report unsupported but recoverable constructs as warnings
-- [ ] Report malformed required geometry/object structures as errors
-- [ ] Include object-path context in validation findings
+- [x] Add structural validation API separate from decode
+- [x] Report unsupported but recoverable constructs as warnings
+- [x] Report malformed required geometry/object structures as errors
+- [x] Include object-path context in validation findings
 
 ---
 
