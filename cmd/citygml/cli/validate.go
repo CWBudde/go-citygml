@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/cwbudde/go-citygml/citygml"
 	"github.com/spf13/cobra"
 )
 
@@ -33,10 +34,7 @@ func runValidate(cmd *cobra.Command, args []string) error {
 		err := validateFile(path)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%s: %v\n", path, err)
-
 			hasErrors = true
-		} else {
-			fmt.Printf("%s: ok\n", path)
 		}
 	}
 
@@ -48,12 +46,37 @@ func runValidate(cmd *cobra.Command, args []string) error {
 }
 
 func validateFile(path string) error {
-	f, err := os.Open(path)
+	doc, err := citygml.ReadFile(path, citygml.Options{})
 	if err != nil {
-		return err
+		return fmt.Errorf("parse error: %w", err)
 	}
-	defer f.Close()
 
-	// TODO: Wire up citygml.Read() + validation once the library core is implemented.
-	return errors.New("validation not yet implemented")
+	findings := citygml.Validate(doc)
+
+	errorCount := 0
+	warningCount := 0
+
+	for _, f := range findings {
+		switch f.Severity {
+		case citygml.SeverityError:
+			fmt.Fprintf(os.Stderr, "%s: ERROR %s\n", path, f)
+			errorCount++
+		case citygml.SeverityWarning:
+			fmt.Fprintf(os.Stderr, "%s: WARN  %s\n", path, f)
+			warningCount++
+		}
+	}
+
+	if errorCount > 0 {
+		fmt.Printf("%s: FAILED (%d errors, %d warnings)\n", path, errorCount, warningCount)
+		return fmt.Errorf("%d errors found", errorCount)
+	}
+
+	if warningCount > 0 {
+		fmt.Printf("%s: OK (%d warnings)\n", path, warningCount)
+	} else {
+		fmt.Printf("%s: OK\n", path)
+	}
+
+	return nil
 }
