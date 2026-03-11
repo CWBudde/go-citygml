@@ -10,6 +10,10 @@ import (
 	"github.com/cwbudde/go-citygml/types"
 )
 
+func wrapScannerError(context string, err error) error {
+	return fmt.Errorf("gml: %s: %w", context, err)
+}
+
 // ParseLinearRing parses a gml:LinearRing element from the scanner.
 // The scanner must be positioned just after the LinearRing StartElement.
 func ParseLinearRing(sc *xmlscan.Scanner) (types.Ring, types.Dimensionality, error) {
@@ -24,7 +28,7 @@ func ParseLinearRing(sc *xmlscan.Scanner) (types.Ring, types.Dimensionality, err
 				return types.Ring{}, 0, errors.New("gml: unexpected EOF in LinearRing")
 			}
 
-			return types.Ring{}, 0, err
+			return types.Ring{}, 0, wrapScannerError("LinearRing token", err)
 		}
 
 		switch t := tok.(type) {
@@ -35,7 +39,7 @@ func ParseLinearRing(sc *xmlscan.Scanner) (types.Ring, types.Dimensionality, err
 			case "pos":
 				text, err := sc.CharData()
 				if err != nil {
-					return types.Ring{}, 0, err
+					return types.Ring{}, 0, wrapScannerError("LinearRing pos char data", err)
 				}
 
 				depth-- // CharData consumed the EndElement
@@ -54,7 +58,7 @@ func ParseLinearRing(sc *xmlscan.Scanner) (types.Ring, types.Dimensionality, err
 			case "posList":
 				text, err := sc.CharData()
 				if err != nil {
-					return types.Ring{}, 0, err
+					return types.Ring{}, 0, wrapScannerError("LinearRing posList char data", err)
 				}
 
 				depth-- // CharData consumed the EndElement
@@ -74,7 +78,7 @@ func ParseLinearRing(sc *xmlscan.Scanner) (types.Ring, types.Dimensionality, err
 				// Skip unknown children.
 				err := sc.Skip()
 				if err != nil {
-					return types.Ring{}, 0, err
+					return types.Ring{}, 0, wrapScannerError("LinearRing skip child", err)
 				}
 
 				depth--
@@ -102,7 +106,7 @@ func ParsePolygon(sc *xmlscan.Scanner) (types.Polygon, types.Dimensionality, err
 				return types.Polygon{}, 0, errors.New("gml: unexpected EOF in Polygon")
 			}
 
-			return types.Polygon{}, 0, err
+			return types.Polygon{}, 0, wrapScannerError("Polygon token", err)
 		}
 
 		switch t := tok.(type) {
@@ -140,7 +144,7 @@ func ParsePolygon(sc *xmlscan.Scanner) (types.Polygon, types.Dimensionality, err
 			default:
 				err := sc.Skip()
 				if err != nil {
-					return types.Polygon{}, 0, err
+					return types.Polygon{}, 0, wrapScannerError("Polygon skip child", err)
 				}
 
 				depth--
@@ -157,56 +161,7 @@ func ParsePolygon(sc *xmlscan.Scanner) (types.Polygon, types.Dimensionality, err
 // ParseMultiSurface parses a gml:MultiSurface element from the scanner.
 // The scanner must be positioned just after the MultiSurface StartElement.
 func ParseMultiSurface(sc *xmlscan.Scanner) (types.MultiSurface, types.Dimensionality, error) {
-	var ms types.MultiSurface
-	var dim types.Dimensionality
-	depth := 1
-
-	for depth > 0 {
-		tok, err := sc.Token()
-		if err != nil {
-			if errors.Is(err, io.EOF) {
-				return types.MultiSurface{}, 0, errors.New("gml: unexpected EOF in MultiSurface")
-			}
-
-			return types.MultiSurface{}, 0, err
-		}
-
-		switch t := tok.(type) {
-		case xml.StartElement:
-			depth++
-
-			switch t.Name.Local {
-			case "surfaceMember":
-				poly, d, err := parseSurfaceMember(sc)
-				if err != nil {
-					return types.MultiSurface{}, 0, err
-				}
-
-				depth--
-
-				if poly != nil {
-					ms.Polygons = append(ms.Polygons, *poly)
-				}
-
-				if dim == 0 {
-					dim = d
-				}
-
-			default:
-				err := sc.Skip()
-				if err != nil {
-					return types.MultiSurface{}, 0, err
-				}
-
-				depth--
-			}
-
-		case xml.EndElement:
-			depth--
-		}
-	}
-
-	return ms, dim, nil
+	return parseSurfaceCollection(sc, "MultiSurface")
 }
 
 // ParseSolid parses a gml:Solid element from the scanner.
@@ -223,7 +178,7 @@ func ParseSolid(sc *xmlscan.Scanner) (types.Solid, types.Dimensionality, error) 
 				return types.Solid{}, 0, errors.New("gml: unexpected EOF in Solid")
 			}
 
-			return types.Solid{}, 0, err
+			return types.Solid{}, 0, wrapScannerError("Solid token", err)
 		}
 
 		switch t := tok.(type) {
@@ -247,7 +202,7 @@ func ParseSolid(sc *xmlscan.Scanner) (types.Solid, types.Dimensionality, error) 
 			default:
 				err := sc.Skip()
 				if err != nil {
-					return types.Solid{}, 0, err
+					return types.Solid{}, 0, wrapScannerError("Solid skip child", err)
 				}
 
 				depth--
@@ -264,6 +219,10 @@ func ParseSolid(sc *xmlscan.Scanner) (types.Solid, types.Dimensionality, error) 
 // ParseCompositeSurface parses a gml:CompositeSurface element.
 // It is treated as equivalent to a MultiSurface for our purposes.
 func ParseCompositeSurface(sc *xmlscan.Scanner) (types.MultiSurface, types.Dimensionality, error) {
+	return parseSurfaceCollection(sc, "CompositeSurface")
+}
+
+func parseSurfaceCollection(sc *xmlscan.Scanner, elementName string) (types.MultiSurface, types.Dimensionality, error) {
 	var ms types.MultiSurface
 	var dim types.Dimensionality
 	depth := 1
@@ -272,10 +231,10 @@ func ParseCompositeSurface(sc *xmlscan.Scanner) (types.MultiSurface, types.Dimen
 		tok, err := sc.Token()
 		if err != nil {
 			if errors.Is(err, io.EOF) {
-				return types.MultiSurface{}, 0, errors.New("gml: unexpected EOF in CompositeSurface")
+				return types.MultiSurface{}, 0, fmt.Errorf("gml: unexpected EOF in %s", elementName)
 			}
 
-			return types.MultiSurface{}, 0, err
+			return types.MultiSurface{}, 0, wrapScannerError(elementName+" token", err)
 		}
 
 		switch t := tok.(type) {
@@ -286,7 +245,7 @@ func ParseCompositeSurface(sc *xmlscan.Scanner) (types.MultiSurface, types.Dimen
 			case "surfaceMember":
 				poly, d, err := parseSurfaceMember(sc)
 				if err != nil {
-					return types.MultiSurface{}, 0, err
+					return types.MultiSurface{}, 0, fmt.Errorf("gml: %s surfaceMember: %w", elementName, err)
 				}
 
 				depth--
@@ -302,7 +261,7 @@ func ParseCompositeSurface(sc *xmlscan.Scanner) (types.MultiSurface, types.Dimen
 			default:
 				err := sc.Skip()
 				if err != nil {
-					return types.MultiSurface{}, 0, err
+					return types.MultiSurface{}, 0, wrapScannerError(elementName+" skip child", err)
 				}
 
 				depth--
@@ -323,7 +282,7 @@ func parseRingWrapper(sc *xmlscan.Scanner) (types.Ring, types.Dimensionality, er
 	for depth > 0 {
 		tok, err := sc.Token()
 		if err != nil {
-			return types.Ring{}, 0, err
+			return types.Ring{}, 0, wrapScannerError("ring wrapper token", err)
 		}
 
 		switch t := tok.(type) {
@@ -333,7 +292,7 @@ func parseRingWrapper(sc *xmlscan.Scanner) (types.Ring, types.Dimensionality, er
 			if t.Name.Local == "LinearRing" {
 				ring, dim, err := ParseLinearRing(sc)
 				if err != nil {
-					return types.Ring{}, 0, err
+					return types.Ring{}, 0, fmt.Errorf("gml: ring wrapper LinearRing: %w", err)
 				}
 
 				depth--
@@ -341,7 +300,7 @@ func parseRingWrapper(sc *xmlscan.Scanner) (types.Ring, types.Dimensionality, er
 				for depth > 0 {
 					tok2, err := sc.Token()
 					if err != nil {
-						return types.Ring{}, 0, err
+						return types.Ring{}, 0, wrapScannerError("ring wrapper drain", err)
 					}
 
 					switch tok2.(type) {
@@ -357,7 +316,7 @@ func parseRingWrapper(sc *xmlscan.Scanner) (types.Ring, types.Dimensionality, er
 
 			err := sc.Skip()
 			if err != nil {
-				return types.Ring{}, 0, err
+				return types.Ring{}, 0, wrapScannerError("ring wrapper skip child", err)
 			}
 
 			depth--
@@ -377,7 +336,7 @@ func parseSurfaceMember(sc *xmlscan.Scanner) (*types.Polygon, types.Dimensionali
 	for depth > 0 {
 		tok, err := sc.Token()
 		if err != nil {
-			return nil, 0, err
+			return nil, 0, wrapScannerError("surfaceMember token", err)
 		}
 
 		switch t := tok.(type) {
@@ -387,14 +346,14 @@ func parseSurfaceMember(sc *xmlscan.Scanner) (*types.Polygon, types.Dimensionali
 			if t.Name.Local == "Polygon" {
 				poly, dim, err := ParsePolygon(sc)
 				if err != nil {
-					return nil, 0, err
+					return nil, 0, fmt.Errorf("gml: surfaceMember Polygon: %w", err)
 				}
 
 				depth--
 				for depth > 0 {
 					tok2, err := sc.Token()
 					if err != nil {
-						return nil, 0, err
+						return nil, 0, wrapScannerError("surfaceMember drain", err)
 					}
 
 					switch tok2.(type) {
@@ -410,7 +369,7 @@ func parseSurfaceMember(sc *xmlscan.Scanner) (*types.Polygon, types.Dimensionali
 
 			err := sc.Skip()
 			if err != nil {
-				return nil, 0, err
+				return nil, 0, wrapScannerError("surfaceMember skip child", err)
 			}
 
 			depth--
@@ -429,7 +388,7 @@ func parseSolidExterior(sc *xmlscan.Scanner) (types.MultiSurface, types.Dimensio
 	for depth > 0 {
 		tok, err := sc.Token()
 		if err != nil {
-			return types.MultiSurface{}, 0, err
+			return types.MultiSurface{}, 0, wrapScannerError("Solid exterior token", err)
 		}
 
 		switch t := tok.(type) {
@@ -440,14 +399,14 @@ func parseSolidExterior(sc *xmlscan.Scanner) (types.MultiSurface, types.Dimensio
 			case "CompositeSurface", "Shell":
 				ms, dim, err := ParseCompositeSurface(sc)
 				if err != nil {
-					return types.MultiSurface{}, 0, err
+					return types.MultiSurface{}, 0, fmt.Errorf("gml: Solid exterior %s: %w", t.Name.Local, err)
 				}
 
 				depth--
 				for depth > 0 {
 					tok2, err := sc.Token()
 					if err != nil {
-						return types.MultiSurface{}, 0, err
+						return types.MultiSurface{}, 0, wrapScannerError("Solid exterior drain", err)
 					}
 
 					switch tok2.(type) {
@@ -463,7 +422,7 @@ func parseSolidExterior(sc *xmlscan.Scanner) (types.MultiSurface, types.Dimensio
 			default:
 				err := sc.Skip()
 				if err != nil {
-					return types.MultiSurface{}, 0, err
+					return types.MultiSurface{}, 0, wrapScannerError("Solid exterior skip child", err)
 				}
 
 				depth--

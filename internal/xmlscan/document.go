@@ -98,7 +98,8 @@ func EachCityObjectMember(sc *Scanner, hdr *DocumentHeader, fn func(elem *Elemen
 			return fmt.Errorf("xmlscan: empty cityObjectMember at %s", sc.Path())
 		}
 
-		if err := fn(inner, sc); err != nil {
+		err = fn(inner, sc)
+		if err != nil {
 			return err
 		}
 	}

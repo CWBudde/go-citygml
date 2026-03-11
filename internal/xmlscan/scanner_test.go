@@ -118,7 +118,8 @@ func TestSkip(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := sc.Skip(); err != nil {
+	err = sc.Skip()
+	if err != nil {
 		t.Fatal(err)
 	}
 
@@ -161,7 +162,8 @@ func TestXLinkHref(t *testing.T) {
 
 	sc := NewScanner(strings.NewReader(input))
 	// Skip root.
-	if _, err := sc.StartElement(); err != nil {
+	_, err := sc.StartElement()
+	if err != nil {
 		t.Fatal(err)
 	}
 
@@ -175,7 +177,7 @@ func TestXLinkHref(t *testing.T) {
 	}
 }
 
-func TestMalformedXML(t *testing.T) {
+func TestMalformedXML(_ *testing.T) {
 	sc := NewScanner(strings.NewReader("<root><unclosed>"))
 
 	// Consume tokens until error.

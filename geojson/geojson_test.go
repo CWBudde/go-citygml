@@ -25,7 +25,9 @@ func TestPolygonGeometry(t *testing.T) {
 	}
 	// Ensure it's valid JSON.
 	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
+
+	err = json.Unmarshal(data, &m)
+	if err != nil {
 		t.Fatal(err)
 	}
 
@@ -147,7 +149,9 @@ func TestFromDocument(t *testing.T) {
 	}
 
 	var decoded FeatureCollection
-	if err := json.Unmarshal(data, &decoded); err != nil {
+
+	err = json.Unmarshal(data, &decoded)
+	if err != nil {
 		t.Fatal(err)
 	}
 

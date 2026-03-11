@@ -27,7 +27,7 @@ func init() {
 	rootCmd.AddCommand(validateCmd)
 }
 
-func runValidate(cmd *cobra.Command, args []string) error {
+func runValidate(_ *cobra.Command, args []string) error {
 	hasErrors := false
 
 	for _, path := range args {
@@ -71,14 +71,14 @@ func validateFile(path string) error {
 	}
 
 	if errorCount > 0 {
-		fmt.Printf("%s: FAILED (%d errors, %d warnings)\n", path, errorCount, warningCount)
+		fmt.Fprintf(os.Stdout, "%s: FAILED (%d errors, %d warnings)\n", path, errorCount, warningCount)
 		return fmt.Errorf("%d errors found", errorCount)
 	}
 
 	if warningCount > 0 {
-		fmt.Printf("%s: OK (%d warnings)\n", path, warningCount)
+		fmt.Fprintf(os.Stdout, "%s: OK (%d warnings)\n", path, warningCount)
 	} else {
-		fmt.Printf("%s: OK\n", path)
+		fmt.Fprintf(os.Stdout, "%s: OK\n", path)
 	}
 
 	return nil

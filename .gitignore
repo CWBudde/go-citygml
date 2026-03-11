@@ -6,6 +6,7 @@
 *.dylib
 # Built binaries
 /citygml
+/citygmlwasm
 
 # Test binary, built with `go test -c`
 *.test
