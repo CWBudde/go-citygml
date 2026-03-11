@@ -78,6 +78,64 @@ for _, b := range doc.Buildings {
 }
 ```
 
+### Validation
+
+```go
+import "github.com/cwbudde/go-citygml/citygml"
+
+doc, _ := citygml.ReadFile("building.gml", citygml.Options{})
+
+findings := citygml.Validate(doc)
+for _, f := range findings {
+    fmt.Println(f) // e.g. "[error] Building[0]/Solid: ring not closed"
+}
+```
+
+### GeoJSON export
+
+```go
+import (
+    "encoding/json"
+    "github.com/cwbudde/go-citygml/citygml"
+    "github.com/cwbudde/go-citygml/geojson"
+)
+
+doc, _ := citygml.ReadFile("city.gml", citygml.Options{})
+fc := geojson.FromDocument(doc)
+
+data, _ := json.MarshalIndent(fc, "", "  ")
+os.WriteFile("output.geojson", data, 0o644)
+```
+
+### Helper utilities
+
+```go
+import "github.com/cwbudde/go-citygml/helpers"
+
+// Bounding box over all geometry
+bbox := helpers.DocumentBBox(doc)
+fmt.Printf("Extent: [%.1f, %.1f] to [%.1f, %.1f]\n", bbox.MinX, bbox.MinY, bbox.MaxX, bbox.MaxY)
+
+// Building heights (measured or derived)
+for _, h := range helpers.BuildingHeights(doc) {
+    fmt.Printf("%s: %.1fm (measured=%v)\n", h.ID, h.Height, h.IsMeasured)
+}
+
+// Terrain summary
+ts := helpers.SummarizeTerrain(doc)
+fmt.Printf("%d terrain objects, %d polygons\n", ts.Count, ts.TotalPolygons)
+```
+
+### Strict mode
+
+```go
+// Reject unsupported objects and require CRS metadata
+doc, err := citygml.ReadFile("building.gml", citygml.Options{Strict: true})
+if errors.Is(err, citygml.ErrUnsupportedObject) {
+    // file contains object types not fully supported
+}
+```
+
 ### CLI
 
 A command-line tool is included for validating CityGML files:
