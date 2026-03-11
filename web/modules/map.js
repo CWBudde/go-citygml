@@ -60,9 +60,14 @@ export function destroyMap() {
 }
 
 function getBackgroundColor() {
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
+  return document.documentElement.getAttribute("data-theme") === "dark"
     ? "#1e293b"
     : "#f0f0f0";
+}
+
+export function updateMapTheme() {
+  if (!map) return;
+  map.setPaintProperty("background", "background-color", getBackgroundColor());
 }
 
 function addDataToMap(geojson, data) {

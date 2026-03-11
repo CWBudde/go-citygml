@@ -1,10 +1,76 @@
-import { initMap, updateMap, highlightFeature, destroyMap } from "./modules/map.js";
+import { initMap, updateMap, highlightFeature, destroyMap, updateMapTheme } from "./modules/map.js";
 import { initScene, updateScene, highlightObject as highlightSceneObject, destroyScene, setWireframe } from "./modules/scene.js";
 import { updateSidebar, setSelectionCallback } from "./modules/sidebar.js";
 
 let wasmReady = false;
 let currentData = null;
 let activeView = "map";
+
+// --- Theme management ---
+
+const THEME_KEY = "citygml-viewer-theme";
+const THEME_MODES = ["auto", "light", "dark"];
+let currentThemeMode = "auto";
+
+function getSystemTheme() {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function applyTheme(mode) {
+  const theme = mode === "auto" ? getSystemTheme() : mode;
+  if (theme === "dark") {
+    document.documentElement.setAttribute("data-theme", "dark");
+  } else if (mode === "light") {
+    // Explicit light: set attribute so auto-dark media query is blocked
+    document.documentElement.setAttribute("data-theme", "light");
+  } else {
+    // auto + light system: no attribute needed
+    document.documentElement.removeAttribute("data-theme");
+  }
+  updateMapTheme();
+}
+
+function updateThemeToggleButtons() {
+  const labels = { auto: "Auto", light: "Light", dark: "Dark" };
+  const sunIcon = `
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  `;
+  const moonIcon = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+  const icon = currentThemeMode === "dark" ? moonIcon : sunIcon;
+  const label = labels[currentThemeMode];
+
+  document.querySelectorAll(".theme-toggle").forEach((btn) => {
+    btn.querySelector("svg").innerHTML = icon;
+    const labelEl = btn.querySelector(".theme-toggle-label");
+    if (labelEl) labelEl.textContent = label;
+  });
+}
+
+function cycleTheme() {
+  const idx = THEME_MODES.indexOf(currentThemeMode);
+  currentThemeMode = THEME_MODES[(idx + 1) % THEME_MODES.length];
+  applyTheme(currentThemeMode);
+  updateThemeToggleButtons();
+  localStorage.setItem(THEME_KEY, currentThemeMode);
+}
+
+function initTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  if (saved && THEME_MODES.includes(saved)) currentThemeMode = saved;
+  applyTheme(currentThemeMode);
+  updateThemeToggleButtons();
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    if (currentThemeMode === "auto") applyTheme("auto");
+  });
+}
 
 // --- WASM initialization ---
 
@@ -17,6 +83,8 @@ async function initWasm() {
   go.run(result.instance);
   wasmReady = true;
 }
+
+initTheme();
 
 initWasm().catch((err) => {
   console.error("WASM init failed:", err);
@@ -35,6 +103,12 @@ const errorMsg = document.getElementById("error-message");
 const fileName = document.getElementById("file-name");
 const fileMeta = document.getElementById("file-meta");
 const newFileBtn = document.getElementById("new-file-btn");
+
+// --- Theme toggle ---
+
+document.querySelectorAll(".theme-toggle").forEach((btn) => {
+  btn.addEventListener("click", cycleTheme);
+});
 
 // --- Drop zone ---
 
