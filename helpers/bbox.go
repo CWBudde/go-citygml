@@ -33,21 +33,27 @@ func DocumentBBox(doc *types.Document) BBox {
 		if pt.X < bb.MinX {
 			bb.MinX = pt.X
 		}
+
 		if pt.X > bb.MaxX {
 			bb.MaxX = pt.X
 		}
+
 		if pt.Y < bb.MinY {
 			bb.MinY = pt.Y
 		}
+
 		if pt.Y > bb.MaxY {
 			bb.MaxY = pt.Y
 		}
+
 		if pt.Z != 0 {
 			bb.Has3D = true
 		}
+
 		if pt.Z < bb.MinZ {
 			bb.MinZ = pt.Z
 		}
+
 		if pt.Z > bb.MaxZ {
 			bb.MaxZ = pt.Z
 		}
@@ -58,9 +64,11 @@ func DocumentBBox(doc *types.Document) BBox {
 		if b.Solid != nil {
 			visitMultiSurface(&b.Solid.Exterior, visit)
 		}
+
 		if b.MultiSurface != nil {
 			visitMultiSurface(b.MultiSurface, visit)
 		}
+
 		for j := range b.BoundedBy {
 			visitMultiSurface(&b.BoundedBy[j].Geometry, visit)
 		}
@@ -78,6 +86,7 @@ func visitMultiSurface(ms *types.MultiSurface, fn func(types.Point)) {
 		for _, pt := range poly.Exterior.Points {
 			fn(pt)
 		}
+
 		for _, ring := range poly.Interior {
 			for _, pt := range ring.Points {
 				fn(pt)

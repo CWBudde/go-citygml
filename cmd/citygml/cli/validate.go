@@ -34,6 +34,7 @@ func runValidate(cmd *cobra.Command, args []string) error {
 		err := validateFile(path)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%s: %v\n", path, err)
+
 			hasErrors = true
 		}
 	}
@@ -60,9 +61,11 @@ func validateFile(path string) error {
 		switch f.Severity {
 		case citygml.SeverityError:
 			fmt.Fprintf(os.Stderr, "%s: ERROR %s\n", path, f)
+
 			errorCount++
 		case citygml.SeverityWarning:
 			fmt.Fprintf(os.Stderr, "%s: WARN  %s\n", path, f)
+
 			warningCount++
 		}
 	}

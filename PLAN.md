@@ -192,8 +192,40 @@ This plan defines a standalone Go library for reading and normalizing CityGML da
 
 ---
 
+## Phase 13 — Web demo (WASM + GitHub Pages)
+
+- [ ] Create WASM entry point (`cmd/citygmlwasm/main.go`)
+  - [ ] Build tag `//go:build js && wasm`
+  - [ ] Register `parseCityGML(Uint8Array) → JSON` on `js.Global()`
+  - [ ] Parse CityGML via `citygml.Read()` with height/footprint derivation
+  - [ ] Run `citygml.Validate()` for findings
+  - [ ] Convert to GeoJSON via `geojson.FromDocument()`
+  - [ ] Compute bounding box via `helpers.BoundingBox()`, normalize 3D coords to centroid-origin
+  - [ ] Return unified JSON: `geojson`, `scene`, `meta`, `objects`, `findings`, `bounds`
+- [ ] Create web UI (`web/`)
+  - [ ] `index.html` — single-page app, loads WASM + JS modules
+  - [ ] `style.css` — dark/light theme, drop zone styling, responsive layout
+  - [ ] `app.js` — WASM init, drop zone handlers, view transitions, state management
+  - [ ] `modules/map.js` — MapLibre GL JS 2D map (buildings colored by height, terrain in green, click popups, auto-fit bounds)
+  - [ ] `modules/scene.js` — Three.js 3D view (surfaces colored by type, OrbitControls, wireframe toggle, click-to-select)
+  - [ ] `modules/sidebar.js` — tabs (Summary, Objects, Validation), object list with click-to-highlight
+- [ ] UI flow
+  - [ ] Landing: full-screen drop zone (drag-drop or click, accepts `.gml`/`.xml`/`.citygml`)
+  - [ ] After parse: fade to visualization layout (70% map/3D + 30% sidebar)
+  - [ ] Toggle button switches between 2D map and 3D scene
+  - [ ] "New File" button returns to drop zone
+  - [ ] Clicking object in sidebar highlights in view and vice versa
+- [ ] GitHub Actions deployment (`.github/workflows/pages.yml`)
+  - [ ] Trigger on push to `main`
+  - [ ] Build WASM: `GOOS=js GOARCH=wasm go build -o web/citygml.wasm ./cmd/citygmlwasm`
+  - [ ] Copy `wasm_exec.js` from Go runtime
+  - [ ] Deploy `web/` to GitHub Pages
+- [ ] Add `build-wasm` recipe to justfile
+
+---
+
 ## Integration with Aconiq
 
-- [ ] Replace Aconiq’s local `citygmlimport` implementation with this library once the building scope is feature-complete
-- [ ] Keep Aconiq-specific mapping from generic city objects into the normalized noise model inside Aconiq
-- [ ] Add an adapter layer instead of leaking Aconiq types into this library
+- [x] Replace Aconiq’s local `citygmlimport` implementation with this library once the building scope is feature-complete
+- [x] Keep Aconiq-specific mapping from generic city objects into the normalized noise model inside Aconiq
+- [x] Add an adapter layer instead of leaking Aconiq types into this library

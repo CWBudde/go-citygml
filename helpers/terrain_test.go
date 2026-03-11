@@ -8,6 +8,7 @@ import (
 
 func TestSummarizeTerrain_Empty(t *testing.T) {
 	doc := &types.Document{}
+
 	s := SummarizeTerrain(doc)
 	if s.Count != 0 || s.TotalPolygons != 0 || len(s.Polygons) != 0 {
 		t.Errorf("expected empty summary: %+v", s)
@@ -26,13 +27,16 @@ func TestSummarizeTerrain(t *testing.T) {
 			}}},
 		},
 	}
+
 	s := SummarizeTerrain(doc)
 	if s.Count != 2 {
 		t.Errorf("count: got %d, want 2", s.Count)
 	}
+
 	if s.TotalPolygons != 3 {
 		t.Errorf("total polygons: got %d, want 3", s.TotalPolygons)
 	}
+
 	if len(s.Polygons) != 3 {
 		t.Errorf("polygons slice: got %d, want 3", len(s.Polygons))
 	}
