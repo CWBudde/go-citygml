@@ -184,6 +184,9 @@ func buildObjects(doc *types.Document) []map[string]any {
 		if b.Function != "" {
 			obj["function"] = b.Function
 		}
+		if b.Usage != "" {
+			obj["usage"] = b.Usage
+		}
 
 		if b.HasMeasuredHeight {
 			obj["height"] = b.MeasuredHeight
@@ -198,6 +201,20 @@ func buildObjects(doc *types.Document) []map[string]any {
 		}
 
 		objects = append(objects, obj)
+	}
+
+	for i := range doc.Terrains {
+		objects = append(objects, map[string]any{
+			"id":   doc.Terrains[i].ID,
+			"type": "Terrain",
+		})
+	}
+
+	for i := range doc.GenericObjects {
+		objects = append(objects, map[string]any{
+			"id":   doc.GenericObjects[i].ID,
+			"type": doc.GenericObjects[i].Type,
+		})
 	}
 
 	return objects
