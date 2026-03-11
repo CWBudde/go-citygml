@@ -8,7 +8,7 @@ export function initMap(containerId, data) {
     return;
   }
 
-  const geojson = data.geojson;
+  const geojson = reprojectGeoJSON(data.geojson, data.meta?.epsgCode);
   if (!geojson || !geojson.features || geojson.features.length === 0) {
     return;
   }
@@ -42,7 +42,7 @@ export function updateMap(data) {
   if (!map) return;
   const source = map.getSource("citygml");
   if (source) {
-    source.setData(data.geojson);
+    source.setData(reprojectGeoJSON(data.geojson, data.meta?.epsgCode));
   }
 }
 
@@ -229,4 +229,98 @@ function visitCoords(coords, fn) {
   for (const c of coords) {
     visitCoords(c, fn);
   }
+}
+
+// UTM EPSG codes: 25831-25838 (ETRS89) and 32601-32660 (WGS84 northern)
+function utmZoneFromEPSG(epsg) {
+  if (epsg >= 25831 && epsg <= 25838) return { zone: epsg - 25800, north: true };
+  if (epsg >= 32601 && epsg <= 32660) return { zone: epsg - 32600, north: true };
+  if (epsg >= 32701 && epsg <= 32760) return { zone: epsg - 32700, north: false };
+  return null;
+}
+
+// Convert UTM easting/northing to WGS84 [longitude, latitude].
+// Based on standard Transverse Mercator series expansion (Bowring/USGS).
+function utmToLonLat(easting, northing, zone, isNorth) {
+  const a = 6378137.0;
+  const e2 = 0.00669437999014; // WGS84 eccentricity squared
+  const k0 = 0.9996;
+
+  const x = easting - 500000;
+  const y = isNorth ? northing : northing - 10000000;
+
+  const lon0 = ((zone - 1) * 6 - 180 + 3) * (Math.PI / 180);
+
+  const e4 = e2 * e2;
+  const e6 = e4 * e2;
+
+  const M = y / k0;
+  const mu =
+    M /
+    (a *
+      (1 - e2 / 4 - (3 * e4) / 64 - (5 * e6) / 256));
+
+  const e1 = (1 - Math.sqrt(1 - e2)) / (1 + Math.sqrt(1 - e2));
+  const phi1 =
+    mu +
+    ((3 * e1) / 2 - (27 * e1 * e1 * e1) / 32) * Math.sin(2 * mu) +
+    ((21 * e1 * e1) / 16 - (55 * e1 * e1 * e1 * e1) / 32) * Math.sin(4 * mu) +
+    ((151 * e1 * e1 * e1) / 96) * Math.sin(6 * mu) +
+    ((1097 * e1 * e1 * e1 * e1) / 512) * Math.sin(8 * mu);
+
+  const sinPhi1 = Math.sin(phi1);
+  const cosPhi1 = Math.cos(phi1);
+  const tanPhi1 = Math.tan(phi1);
+
+  const N1 = a / Math.sqrt(1 - e2 * sinPhi1 * sinPhi1);
+  const T1 = tanPhi1 * tanPhi1;
+  const C1 = (e2 / (1 - e2)) * cosPhi1 * cosPhi1;
+  const R1 = (a * (1 - e2)) / Math.pow(1 - e2 * sinPhi1 * sinPhi1, 1.5);
+  const D = x / (N1 * k0);
+  const D2 = D * D;
+  const D4 = D2 * D2;
+  const D6 = D4 * D2;
+
+  const lat =
+    phi1 -
+    ((N1 * tanPhi1) / R1) *
+      (D2 / 2 -
+        ((5 + 3 * T1 + 10 * C1 - 4 * C1 * C1 - 9 * (e2 / (1 - e2))) * D4) / 24 +
+        ((61 + 90 * T1 + 298 * C1 + 45 * T1 * T1 - 252 * (e2 / (1 - e2)) - 3 * C1 * C1) * D6) / 720);
+
+  const lon =
+    lon0 +
+    (D -
+      ((1 + 2 * T1 + C1) * D2 * D) / 6 +
+      ((5 - 2 * C1 + 28 * T1 - 3 * C1 * C1 + 8 * (e2 / (1 - e2)) + 24 * T1 * T1) * D4 * D) / 120) /
+      cosPhi1;
+
+  return [lon * (180 / Math.PI), lat * (180 / Math.PI)];
+}
+
+function transformCoord(coord, utmInfo) {
+  if (!utmInfo) return coord;
+  return utmToLonLat(coord[0], coord[1], utmInfo.zone, utmInfo.north);
+}
+
+function transformCoords(coords, utmInfo) {
+  if (!Array.isArray(coords)) return coords;
+  if (typeof coords[0] === "number") return transformCoord(coords, utmInfo);
+  return coords.map((c) => transformCoords(c, utmInfo));
+}
+
+function reprojectGeoJSON(geojson, epsgCode) {
+  if (!geojson) return geojson;
+  const utmInfo = epsgCode ? utmZoneFromEPSG(epsgCode) : null;
+  if (!utmInfo) return geojson;
+
+  return {
+    ...geojson,
+    features: geojson.features.map((f) => ({
+      ...f,
+      geometry: f.geometry
+        ? { ...f.geometry, coordinates: transformCoords(f.geometry.coordinates, utmInfo) }
+        : null,
+    })),
+  };
 }

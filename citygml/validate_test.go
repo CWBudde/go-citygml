@@ -19,8 +19,11 @@ func TestValidate_ValidDocument(t *testing.T) {
 			Solid: &types.Solid{
 				Exterior: types.MultiSurface{Polygons: []types.Polygon{{
 					Exterior: types.Ring{Points: []types.Point{
-						{X: 0, Y: 0, Z: 0}, {X: 10, Y: 0, Z: 0},
-						{X: 10, Y: 10, Z: 0}, {X: 0, Y: 10, Z: 0}, {X: 0, Y: 0, Z: 0},
+						{X: 0, Y: 0, Z: 0},
+						{X: 10, Y: 0, Z: 0},
+						{X: 10, Y: 10, Z: 0},
+						{X: 0, Y: 10, Z: 0},
+						{X: 0, Y: 0, Z: 0},
 					}},
 				}}},
 			},
@@ -189,7 +192,8 @@ func TestValidate_MalformedGeometry(t *testing.T) {
 			Solid: &types.Solid{
 				Exterior: types.MultiSurface{Polygons: []types.Polygon{{
 					Exterior: types.Ring{Points: []types.Point{
-						{X: 0, Y: 0, Z: 0}, {X: 10, Y: 0, Z: 0},
+						{X: 0, Y: 0, Z: 0},
+						{X: 10, Y: 0, Z: 0},
 						{X: 5, Y: 5, Z: 0}, // not closed, only 3 points
 					}},
 				}}},
@@ -222,8 +226,11 @@ func TestValidate_NonFiniteCoordinates(t *testing.T) {
 			MeasuredHeight:    10,
 			MultiSurface: &types.MultiSurface{Polygons: []types.Polygon{{
 				Exterior: types.Ring{Points: []types.Point{
-					{X: 0, Y: 0, Z: 0}, {X: math.NaN(), Y: 0, Z: 0},
-					{X: 10, Y: 10, Z: 0}, {X: 0, Y: 10, Z: 0}, {X: 0, Y: 0, Z: 0},
+					{X: 0, Y: 0, Z: 0},
+					{X: math.NaN(), Y: 0, Z: 0},
+					{X: 10, Y: 10, Z: 0},
+					{X: 0, Y: 10, Z: 0},
+					{X: 0, Y: 0, Z: 0},
 				}},
 			}}},
 		}},

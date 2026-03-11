@@ -198,7 +198,9 @@ function triangulatePolygon(THREE, ring) {
   const indices = [];
 
   for (const pt of ring) {
-    vertices.push(pt[0], pt[1], pt[2]);
+    // CityGML UTM coordinates: [easting, northing, height]
+    // Three.js is Y-up, so map: X=easting, Y=height, Z=-northing
+    vertices.push(pt[0], pt[2], -pt[1]);
   }
 
   // Fan triangulation from first vertex
