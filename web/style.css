@@ -16,8 +16,25 @@
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --bg-card: #1e293b;
+  --bg-hover: #334155;
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --border: #334155;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --error-bg: #1c1017;
+  --error-text: #f87171;
+  --warning-bg: #1c1a0e;
+  --warning-text: #fbbf24;
+  --success-text: #34d399;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #0f172a;
     --bg-card: #1e293b;
     --bg-hover: #334155;
@@ -78,6 +95,50 @@ body {
 
 #drop-zone-view header {
   text-align: center;
+  position: relative;
+}
+
+/* Theme toggle */
+.theme-toggle {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  transition: background 0.15s, color 0.15s;
+}
+
+.theme-toggle:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.theme-toggle svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* Position the toggle absolutely inside the drop-zone header */
+#drop-zone-view header .theme-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.theme-toggle-label {
+  display: none;
+}
+
+@media (min-width: 500px) {
+  .theme-toggle-label {
+    display: inline;
+  }
 }
 
 #drop-zone-view h1 {
@@ -463,6 +524,27 @@ body {
 .validation-summary .count-ok {
   color: var(--success-text);
   font-weight: 600;
+}
+
+/* MapLibre popup dark mode */
+[data-theme="dark"] .maplibregl-popup-content {
+  background: var(--bg-card);
+  color: var(--text);
+}
+
+[data-theme="dark"] .maplibregl-popup-tip {
+  border-top-color: var(--bg-card);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .maplibregl-popup-content {
+    background: var(--bg-card);
+    color: var(--text);
+  }
+
+  :root:not([data-theme="light"]) .maplibregl-popup-tip {
+    border-top-color: var(--bg-card);
+  }
 }
 
 /* Responsive */
