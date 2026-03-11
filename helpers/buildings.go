@@ -9,18 +9,20 @@ func BuildingHeight(b *types.Building) (float64, bool) {
 	if b.HasMeasuredHeight {
 		return b.MeasuredHeight, true
 	}
+
 	if b.DerivedHeight > 0 {
 		return b.DerivedHeight, true
 	}
+
 	return 0, false
 }
 
 // HeightResult pairs a building ID with its effective height.
 type HeightResult struct {
-	ID              string
-	Height          float64
-	IsMeasured      bool
-	HasHeight       bool
+	ID         string
+	Height     float64
+	IsMeasured bool
+	HasHeight  bool
 }
 
 // BuildingHeights extracts the effective height for every building in the document.
@@ -36,6 +38,7 @@ func BuildingHeights(doc *types.Document) []HeightResult {
 			HasHeight:  ok,
 		}
 	}
+
 	return results
 }
 
@@ -56,5 +59,6 @@ func BuildingFootprints(doc *types.Document) []FootprintResult {
 			Footprint: b.Footprint,
 		}
 	}
+
 	return results
 }

@@ -58,6 +58,7 @@ func FuzzValidateRing(f *testing.F) {
 		if closed {
 			pts = append(pts, pts[0])
 		}
+
 		ring := types.Ring{Points: pts}
 		// Must not panic.
 		_ = ValidateRing(ring, "fuzz")

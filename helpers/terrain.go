@@ -15,10 +15,12 @@ type TerrainSummary struct {
 // SummarizeTerrain aggregates terrain geometry from all terrain objects in the document.
 func SummarizeTerrain(doc *types.Document) TerrainSummary {
 	var s TerrainSummary
+
 	s.Count = len(doc.Terrains)
 	for _, t := range doc.Terrains {
 		s.TotalPolygons += len(t.Geometry.Polygons)
 		s.Polygons = append(s.Polygons, t.Geometry.Polygons...)
 	}
+
 	return s
 }

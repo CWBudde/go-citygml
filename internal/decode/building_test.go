@@ -51,15 +51,19 @@ func TestBuilding_Attributes(t *testing.T) {
 	if b.ID != "B_ATTR" {
 		t.Errorf("ID = %q, want B_ATTR", b.ID)
 	}
+
 	if b.Class != "1000" {
 		t.Errorf("Class = %q, want 1000", b.Class)
 	}
+
 	if b.Function != "1010" {
 		t.Errorf("Function = %q, want 1010", b.Function)
 	}
+
 	if b.Usage != "residential" {
 		t.Errorf("Usage = %q, want residential", b.Usage)
 	}
+
 	if !b.HasMeasuredHeight || b.MeasuredHeight != 12.5 {
 		t.Errorf("MeasuredHeight = %g (has=%v), want 12.5", b.MeasuredHeight, b.HasMeasuredHeight)
 	}
@@ -98,12 +102,15 @@ func TestBuilding_Lod1Solid(t *testing.T) {
 	if b.LoD != types.LoD1 {
 		t.Errorf("LoD = %q, want 1", b.LoD)
 	}
+
 	if b.Solid == nil {
 		t.Fatal("expected Solid geometry")
 	}
+
 	if len(b.Solid.Exterior.Polygons) != 1 {
 		t.Errorf("got %d solid polygons, want 1", len(b.Solid.Exterior.Polygons))
 	}
+
 	if b.MultiSurface != nil {
 		t.Error("expected nil MultiSurface")
 	}
@@ -142,6 +149,7 @@ func TestBuilding_Lod2Solid(t *testing.T) {
 	if b.LoD != types.LoD2 {
 		t.Errorf("LoD = %q, want 2", b.LoD)
 	}
+
 	if b.Solid == nil {
 		t.Fatal("expected Solid geometry")
 	}
@@ -176,12 +184,15 @@ func TestBuilding_Lod1MultiSurface(t *testing.T) {
 	if b.LoD != types.LoD1 {
 		t.Errorf("LoD = %q, want 1", b.LoD)
 	}
+
 	if b.MultiSurface == nil {
 		t.Fatal("expected MultiSurface geometry")
 	}
+
 	if len(b.MultiSurface.Polygons) != 1 {
 		t.Errorf("got %d polygons, want 1", len(b.MultiSurface.Polygons))
 	}
+
 	if b.Solid != nil {
 		t.Error("expected nil Solid")
 	}
@@ -216,6 +227,7 @@ func TestBuilding_Lod2MultiSurface(t *testing.T) {
 	if b.LoD != types.LoD2 {
 		t.Errorf("LoD = %q, want 2", b.LoD)
 	}
+
 	if b.MultiSurface == nil {
 		t.Fatal("expected MultiSurface geometry")
 	}
@@ -300,9 +312,11 @@ func TestBuilding_BoundedSurfaces(t *testing.T) {
 		if b.BoundedBy[i].ID != w.id {
 			t.Errorf("surface[%d].ID = %q, want %q", i, b.BoundedBy[i].ID, w.id)
 		}
+
 		if b.BoundedBy[i].Type != w.typ {
 			t.Errorf("surface[%d].Type = %q, want %q", i, b.BoundedBy[i].Type, w.typ)
 		}
+
 		if len(b.BoundedBy[i].Geometry.Polygons) != 1 {
 			t.Errorf("surface[%d] polygons = %d, want 1", i, len(b.BoundedBy[i].Geometry.Polygons))
 		}
@@ -324,15 +338,19 @@ func TestBuilding_Minimal(t *testing.T) {
 	if b.ID != "B_MINIMAL" {
 		t.Errorf("ID = %q, want B_MINIMAL", b.ID)
 	}
+
 	if b.HasMeasuredHeight {
 		t.Error("should not have measured height")
 	}
+
 	if b.Solid != nil {
 		t.Error("expected nil Solid")
 	}
+
 	if b.MultiSurface != nil {
 		t.Error("expected nil MultiSurface")
 	}
+
 	if len(b.BoundedBy) != 0 {
 		t.Errorf("expected no bounded surfaces, got %d", len(b.BoundedBy))
 	}
@@ -358,6 +376,7 @@ func TestBuilding_SkipsUnknownChildren(t *testing.T) {
 	if b.ID != "B_UNK" {
 		t.Errorf("ID = %q, want B_UNK", b.ID)
 	}
+
 	if !b.HasMeasuredHeight || b.MeasuredHeight != 5.0 {
 		t.Errorf("MeasuredHeight = %g (has=%v), want 5.0", b.MeasuredHeight, b.HasMeasuredHeight)
 	}
@@ -381,9 +400,11 @@ func TestBuilding_CityGML30(t *testing.T) {
 	if b.ID != "B30" {
 		t.Errorf("ID = %q, want B30", b.ID)
 	}
+
 	if b.Class != "office" {
 		t.Errorf("Class = %q, want office", b.Class)
 	}
+
 	if b.MeasuredHeight != 20.0 {
 		t.Errorf("MeasuredHeight = %g, want 20.0", b.MeasuredHeight)
 	}

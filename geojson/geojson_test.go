@@ -28,6 +28,7 @@ func TestPolygonGeometry(t *testing.T) {
 	if err := json.Unmarshal(data, &m); err != nil {
 		t.Fatal(err)
 	}
+
 	if m["type"] != "Polygon" {
 		t.Errorf("serialized type: %v", m["type"])
 	}
@@ -63,18 +64,23 @@ func TestBuildingFeature_WithFootprint(t *testing.T) {
 	if f.ID != "B1" {
 		t.Errorf("id: %q", f.ID)
 	}
+
 	if f.Type != "Feature" {
 		t.Errorf("type: %q", f.Type)
 	}
+
 	if f.Geometry == nil {
 		t.Fatal("expected geometry")
 	}
+
 	if f.Geometry.Type != "Polygon" {
 		t.Errorf("geometry type: %q", f.Geometry.Type)
 	}
+
 	if f.Properties["class"] != "residential" {
 		t.Errorf("class: %v", f.Properties["class"])
 	}
+
 	if f.Properties["measuredHeight"] != 12.5 {
 		t.Errorf("measuredHeight: %v", f.Properties["measuredHeight"])
 	}
@@ -82,6 +88,7 @@ func TestBuildingFeature_WithFootprint(t *testing.T) {
 
 func TestBuildingFeature_NoGeometry(t *testing.T) {
 	b := &types.Building{ID: "B2"}
+
 	f := BuildingFeature(b)
 	if f.Geometry != nil {
 		t.Error("expected nil geometry")
@@ -100,9 +107,11 @@ func TestTerrainFeature(t *testing.T) {
 	if f.ID != "T1" {
 		t.Errorf("id: %q", f.ID)
 	}
+
 	if f.Geometry == nil || f.Geometry.Type != "MultiPolygon" {
 		t.Error("expected MultiPolygon geometry")
 	}
+
 	if f.Properties["type"] != "Terrain" {
 		t.Errorf("type prop: %v", f.Properties["type"])
 	}
@@ -126,6 +135,7 @@ func TestFromDocument(t *testing.T) {
 	if fc.Type != "FeatureCollection" {
 		t.Errorf("type: %q", fc.Type)
 	}
+
 	if len(fc.Features) != 2 {
 		t.Fatalf("features: got %d, want 2", len(fc.Features))
 	}
@@ -135,10 +145,12 @@ func TestFromDocument(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	var decoded FeatureCollection
 	if err := json.Unmarshal(data, &decoded); err != nil {
 		t.Fatal(err)
 	}
+
 	if len(decoded.Features) != 2 {
 		t.Errorf("decoded features: %d", len(decoded.Features))
 	}
@@ -146,6 +158,7 @@ func TestFromDocument(t *testing.T) {
 
 func TestFromDocument_Empty(t *testing.T) {
 	doc := &types.Document{}
+
 	fc := FromDocument(doc)
 	if len(fc.Features) != 0 {
 		t.Errorf("expected 0 features, got %d", len(fc.Features))
@@ -165,9 +178,12 @@ func TestPolygonGeometry_WithHoles(t *testing.T) {
 
 	// Verify coordinates include two rings.
 	var rings [][][2]float64
-	if err := json.Unmarshal(g.Coordinates, &rings); err != nil {
+
+	err := json.Unmarshal(g.Coordinates, &rings)
+	if err != nil {
 		t.Fatal(err)
 	}
+
 	if len(rings) != 2 {
 		t.Errorf("got %d rings, want 2", len(rings))
 	}

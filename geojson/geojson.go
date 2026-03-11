@@ -14,10 +14,10 @@ type Geometry struct {
 
 // Feature represents a GeoJSON Feature.
 type Feature struct {
-	Type       string            `json:"type"`
-	ID         string            `json:"id,omitempty"`
-	Geometry   *Geometry         `json:"geometry"`
-	Properties map[string]any    `json:"properties"`
+	Type       string         `json:"type"`
+	ID         string         `json:"id,omitempty"`
+	Geometry   *Geometry      `json:"geometry"`
+	Properties map[string]any `json:"properties"`
 }
 
 // FeatureCollection represents a GeoJSON FeatureCollection.
@@ -37,12 +37,14 @@ func NewFeatureCollection() *FeatureCollection {
 // PolygonGeometry converts a types.Polygon to a GeoJSON Polygon geometry.
 func PolygonGeometry(poly types.Polygon) *Geometry {
 	rings := make([][][2]float64, 0, 1+len(poly.Interior))
+
 	rings = append(rings, ringCoords(poly.Exterior))
 	for _, inner := range poly.Interior {
 		rings = append(rings, ringCoords(inner))
 	}
 
 	coords, _ := json.Marshal(rings)
+
 	return &Geometry{
 		Type:        "Polygon",
 		Coordinates: coords,
@@ -54,14 +56,17 @@ func MultiPolygonGeometry(ms types.MultiSurface) *Geometry {
 	polys := make([][][][2]float64, len(ms.Polygons))
 	for i, poly := range ms.Polygons {
 		rings := make([][][2]float64, 0, 1+len(poly.Interior))
+
 		rings = append(rings, ringCoords(poly.Exterior))
 		for _, inner := range poly.Interior {
 			rings = append(rings, ringCoords(inner))
 		}
+
 		polys[i] = rings
 	}
 
 	coords, _ := json.Marshal(polys)
+
 	return &Geometry{
 		Type:        "MultiPolygon",
 		Coordinates: coords,
@@ -73,6 +78,7 @@ func ringCoords(ring types.Ring) [][2]float64 {
 	for i, pt := range ring.Points {
 		coords[i] = [2]float64{pt.X, pt.Y}
 	}
+
 	return coords
 }
 
@@ -85,18 +91,23 @@ func BuildingFeature(b *types.Building) Feature {
 	if b.Class != "" {
 		props["class"] = b.Class
 	}
+
 	if b.Function != "" {
 		props["function"] = b.Function
 	}
+
 	if b.Usage != "" {
 		props["usage"] = b.Usage
 	}
+
 	if b.HasMeasuredHeight {
 		props["measuredHeight"] = b.MeasuredHeight
 	}
+
 	if b.DerivedHeight > 0 {
 		props["derivedHeight"] = b.DerivedHeight
 	}
+
 	if b.LoD != "" {
 		props["lod"] = string(b.LoD)
 	}

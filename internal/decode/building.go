@@ -373,6 +373,15 @@ func decodeSurfaceElement(surfType string, elem *xmlscan.Element, sc *xmlscan.Sc
 				depth--
 				surf.Geometry = ms
 
+			case "Polygon":
+				poly, _, err := gml.ParsePolygon(sc)
+				if err != nil {
+					return nil, err
+				}
+
+				depth--
+				surf.Geometry = types.MultiSurface{Polygons: []types.Polygon{poly}}
+
 			default:
 				err := sc.Skip()
 				if err != nil {
