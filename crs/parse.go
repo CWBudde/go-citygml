@@ -17,6 +17,7 @@ import (
 //   urn:ogc:def:crs:EPSG::25832
 //   urn:ogc:def:crs:EPSG:6.12:25832
 //   http://www.opengis.net/def/crs/EPSG/0/25832
+//   urn:adv:crs:ETRS89_UTM32*DE_DHHN92_NH  (German ADV compound CRS)
 //
 // All are normalized to an EPSG integer code.
 
@@ -24,6 +25,9 @@ var (
 	reEPSGShort = regexp.MustCompile(`^EPSG:(\d+)$`)
 	reURN       = regexp.MustCompile(`^urn:ogc:def:crs:EPSG:[^:]*:(\d+)$`)
 	reHTTP      = regexp.MustCompile(`^https?://www\.opengis\.net/def/crs/EPSG/\d+/(\d+)$`)
+	// German ADV CRS: urn:adv:crs:ETRS89_UTM<zone>[*<vertical>]
+	// ETRS89_UTM32 → EPSG:25832, ETRS89_UTM33 → EPSG:25833, etc.
+	reADVUTM = regexp.MustCompile(`^urn:adv:crs:ETRS89_UTM(\d+)`)
 )
 
 // Parse interprets an srsName string and returns structured CRS metadata.
@@ -45,6 +49,12 @@ func extractCode(s string) int {
 			code, _ := strconv.Atoi(m[1])
 			return code
 		}
+	}
+
+	// German ADV UTM: zone number maps to EPSG 258XX (e.g. UTM32 → 25832)
+	if m := reADVUTM.FindStringSubmatch(s); m != nil {
+		zone, _ := strconv.Atoi(m[1])
+		return 25800 + zone
 	}
 
 	return 0

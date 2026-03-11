@@ -51,3 +51,6 @@ Thumbs.db
 # CI / Test outputs from justfile
 coverage.out
 coverage.html
+
+# private test data
+testdata/hannover/

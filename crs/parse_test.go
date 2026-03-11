@@ -57,6 +57,16 @@ func TestParse(t *testing.T) {
 			wantYX:   false,
 		},
 		{
+			name:     "ADV UTM32 compound CRS",
+			input:    "urn:adv:crs:ETRS89_UTM32*DE_DHHN92_NH",
+			wantCode: 25832,
+		},
+		{
+			name:     "ADV UTM33 compound CRS",
+			input:    "urn:adv:crs:ETRS89_UTM33*DE_DHHN92_NH",
+			wantCode: 25833,
+		},
+		{
 			name:      "unrecognized format",
 			input:     "some-unknown-crs",
 			wantCode:  0,
