@@ -29,7 +29,7 @@ func (e *ValidationError) Error() string {
 //   - first and last points are identical (closed)
 //   - all coordinates are finite
 func ValidateRing(ring types.Ring, path string) []error {
-	var errs []error
+	errs := make([]error, 0, 2)
 
 	if len(ring.Points) < 4 {
 		errs = append(errs, &ValidationError{
@@ -64,7 +64,7 @@ func ValidateRing(ring types.Ring, path string) []error {
 
 // ValidatePolygon validates a polygon's exterior and interior rings.
 func ValidatePolygon(poly types.Polygon, path string) []error {
-	var errs []error
+	errs := make([]error, 0, 1+len(poly.Interior))
 
 	errs = append(errs, ValidateRing(poly.Exterior, path+".exterior")...)
 	for i, ring := range poly.Interior {
@@ -76,7 +76,7 @@ func ValidatePolygon(poly types.Polygon, path string) []error {
 
 // ValidateMultiSurface validates all polygons in a multi-surface.
 func ValidateMultiSurface(ms types.MultiSurface, path string) []error {
-	var errs []error
+	errs := make([]error, 0, len(ms.Polygons))
 	for i, poly := range ms.Polygons {
 		errs = append(errs, ValidatePolygon(poly, fmt.Sprintf("%s.polygon[%d]", path, i))...)
 	}

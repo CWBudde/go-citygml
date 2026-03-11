@@ -112,7 +112,7 @@ func TestEachCityObjectMember_Empty(t *testing.T) {
 
 	count := 0
 
-	err = EachCityObjectMember(sc, hdr, func(elem *Element, sc *Scanner) error {
+	err = EachCityObjectMember(sc, hdr, func(_ *Element, sc *Scanner) error {
 		count++
 		return sc.Skip()
 	})
@@ -133,7 +133,7 @@ func TestEachCityObjectMember_ExtractsEnvelopeSRS(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = EachCityObjectMember(sc, hdr, func(elem *Element, sc *Scanner) error {
+	err = EachCityObjectMember(sc, hdr, func(_ *Element, sc *Scanner) error {
 		return sc.Skip()
 	})
 	if err != nil {

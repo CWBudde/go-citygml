@@ -80,6 +80,11 @@ linters:
       - linters: [wrapcheck]
         path: internal/
 
+      # package name `types` is intentional for the public model package
+      - linters: [revive]
+        path: types/
+        text: "avoid meaningless package names"
+
       # funlen: XML parsing and geometry functions are inherently long
       - linters: [funlen]
         path: internal/decode/

@@ -18,7 +18,7 @@ func FuzzParsePos(f *testing.F) {
 	f.Add("1.0")
 	f.Add("1.0 2.0 3.0 4.0")
 
-	f.Fuzz(func(t *testing.T, input string) {
+	f.Fuzz(func(_ *testing.T, input string) {
 		// Must not panic.
 		_, _, _ = ParsePos(input)
 	})
@@ -35,7 +35,7 @@ func FuzzParsePosList(f *testing.F) {
 	f.Add("1 2 3 4 5", 3)
 	f.Add("1e-300 2e300 3", 3)
 
-	f.Fuzz(func(t *testing.T, input string, dim int) {
+	f.Fuzz(func(_ *testing.T, input string, dim int) {
 		if dim < 2 || dim > 3 {
 			return
 		}
@@ -47,7 +47,7 @@ func FuzzParsePosList(f *testing.F) {
 func FuzzValidateRing(f *testing.F) {
 	f.Add(true) // Minimal seed; ring is constructed in the fuzz function.
 
-	f.Fuzz(func(t *testing.T, closed bool) {
+	f.Fuzz(func(_ *testing.T, closed bool) {
 		// Construct a ring programmatically with variable closure.
 		pts := []types.Point{
 			{X: 0, Y: 0, Z: 0},

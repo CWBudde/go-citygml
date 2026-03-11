@@ -43,7 +43,7 @@ func PolygonGeometry(poly types.Polygon) *Geometry {
 		rings = append(rings, ringCoords(inner))
 	}
 
-	coords, _ := json.Marshal(rings)
+	coords := marshalCoordinates(rings)
 
 	return &Geometry{
 		Type:        "Polygon",
@@ -65,12 +65,21 @@ func MultiPolygonGeometry(ms types.MultiSurface) *Geometry {
 		polys[i] = rings
 	}
 
-	coords, _ := json.Marshal(polys)
+	coords := marshalCoordinates(polys)
 
 	return &Geometry{
 		Type:        "MultiPolygon",
 		Coordinates: coords,
 	}
+}
+
+func marshalCoordinates(coords any) json.RawMessage {
+	data, err := json.Marshal(coords)
+	if err != nil {
+		return json.RawMessage("null")
+	}
+
+	return data
 }
 
 func ringCoords(ring types.Ring) [][2]float64 {
@@ -113,11 +122,13 @@ func BuildingFeature(b *types.Building) Feature {
 	}
 
 	var geom *Geometry
-	if b.Footprint != nil {
+
+	switch {
+	case b.Footprint != nil:
 		geom = PolygonGeometry(*b.Footprint)
-	} else if b.MultiSurface != nil && len(b.MultiSurface.Polygons) > 0 {
+	case b.MultiSurface != nil && len(b.MultiSurface.Polygons) > 0:
 		geom = MultiPolygonGeometry(*b.MultiSurface)
-	} else if b.Solid != nil && len(b.Solid.Exterior.Polygons) > 0 {
+	case b.Solid != nil && len(b.Solid.Exterior.Polygons) > 0:
 		geom = MultiPolygonGeometry(b.Solid.Exterior)
 	}
 

@@ -15,6 +15,12 @@ import (
 	"github.com/cwbudde/go-citygml/types"
 )
 
+const (
+	lod1MultiSurfaceElement = "lod1MultiSurface"
+	lod2MultiSurfaceElement = "lod2MultiSurface"
+	multiSurfaceElement     = "MultiSurface"
+)
+
 // IsBuildingElement returns true if the element is a recognized building element.
 func IsBuildingElement(elem *xmlscan.Element) bool {
 	ns := elem.Namespace()
@@ -123,20 +129,20 @@ func decodeBuildingChild(se xml.StartElement, sc *xmlscan.Scanner, b *types.Buil
 		b.LoD = types.LoD2
 		b.Solid = solid
 
-	case "lod1MultiSurface":
+	case lod1MultiSurfaceElement:
 		ms, err := decodeLodMultiSurface(sc)
 		if err != nil {
-			return fmt.Errorf("decode: lod1MultiSurface: %w", err)
+			return fmt.Errorf("decode: %s: %w", lod1MultiSurfaceElement, err)
 		}
 
 		*depth--
 		b.LoD = types.LoD1
 		b.MultiSurface = ms
 
-	case "lod2MultiSurface":
+	case lod2MultiSurfaceElement:
 		ms, err := decodeLodMultiSurface(sc)
 		if err != nil {
-			return fmt.Errorf("decode: lod2MultiSurface: %w", err)
+			return fmt.Errorf("decode: %s: %w", lod2MultiSurfaceElement, err)
 		}
 
 		*depth--
@@ -217,6 +223,7 @@ func decodeLodSolid(sc *xmlscan.Scanner) (*types.Solid, error) {
 		}
 	}
 
+	//nolint:nilnil // Missing wrapped Solid is a valid absence case for optional LoD geometry.
 	return nil, nil
 }
 
@@ -233,7 +240,7 @@ func decodeLodMultiSurface(sc *xmlscan.Scanner) (*types.MultiSurface, error) {
 		case xml.StartElement:
 			depth++
 
-			if t.Name.Local == "MultiSurface" {
+			if t.Name.Local == multiSurfaceElement {
 				ms, _, err := gml.ParseMultiSurface(sc)
 				if err != nil {
 					return nil, err
@@ -269,6 +276,7 @@ func decodeLodMultiSurface(sc *xmlscan.Scanner) (*types.MultiSurface, error) {
 		}
 	}
 
+	//nolint:nilnil // Missing wrapped MultiSurface is a valid absence case for optional LoD geometry.
 	return nil, nil
 }
 
@@ -330,6 +338,7 @@ func decodeBoundedBy(sc *xmlscan.Scanner) (*types.Surface, error) {
 		}
 	}
 
+	//nolint:nilnil // Missing recognized boundedBy surface is a valid absence case.
 	return nil, nil
 }
 
