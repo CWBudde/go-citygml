@@ -88,6 +88,21 @@ go install github.com/cwbudde/go-citygml/cmd/citygml@latest
 citygml validate building.gml
 ```
 
+## Performance
+
+The parser uses forward-only streaming via Go's `encoding/xml.Decoder` — no DOM tree is built. Memory usage scales linearly with the number of city objects, not with raw XML size.
+
+| Input size | Time | Throughput | Memory |
+|------------|------|------------|--------|
+| 1 building | ~36 µs | ~45 MB/s | ~12 KB |
+| 100 buildings | ~2.5 ms | ~48 MB/s | ~735 KB |
+| 1,000 buildings | ~30 ms | ~45 MB/s | ~7.3 MB |
+| 5,000 buildings | ~130 ms | ~47 MB/s | ~42 MB |
+
+Memory per building is approximately 7 KB (including geometry, attributes, and derived footprint). Disabling height/footprint derivation (`DeriveHeights`/`DeriveFootprints` options) reduces allocations slightly.
+
+For very large files, consider processing in batches at the application level since the library currently collects all objects into a single `Document` struct.
+
 ## Non-goals for v1
 
 - Full CityGML conformance across every ADE/profile
