@@ -4,8 +4,9 @@
 *.dll
 *.so
 *.dylib
-# Built binaries
+# Built binaries (files only, not directories)
 /citygml
+!/citygml/
 /citygmlwasm
 
 # WASM build artifacts
