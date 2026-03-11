@@ -23,7 +23,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.25"
+          go-version: "1.25.x"
 
       - name: Build WASM
         run: GOOS=js GOARCH=wasm go build -o web/citygml.wasm ./cmd/citygmlwasm
