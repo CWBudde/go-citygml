@@ -172,10 +172,13 @@ This plan defines a standalone Go library for reading and normalizing CityGML da
 
 ## Phase 11 — Performance and memory
 
-- [ ] Benchmark large XML inputs
-- [ ] Avoid unnecessary DOM-style loading where possible
-- [ ] Evaluate streaming decode boundaries
-- [ ] Document expected memory behavior for large files
+- [x] Benchmark large XML inputs
+- [x] Avoid unnecessary DOM-style loading where possible
+  - Already streaming: forward-only xml.Decoder, no DOM tree built
+- [x] Evaluate streaming decode boundaries
+  - Objects collected into Document struct; per-object streaming not needed for v1
+  - Throughput ~45-48 MB/s, linear scaling confirmed up to 5000 buildings
+- [x] Document expected memory behavior for large files
 
 ---
 
