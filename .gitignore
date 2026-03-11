@@ -8,6 +8,10 @@
 /citygml
 /citygmlwasm
 
+# WASM build artifacts
+web/citygml.wasm
+web/wasm_exec.js
+
 # Test binary, built with `go test -c`
 *.test
 

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CityGML Viewer</title>
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="CityGML Viewer" />
+    <meta
+      property="og:description"
+      content="Visualize CityGML files in your browser. Parse buildings, terrain, and geometry with an interactive 2D map and 3D scene viewer."
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Drop Zone (landing view) -->
+      <div id="drop-zone-view" class="view active">
+        <header>
+          <h1>CityGML Viewer</h1>
+          <p class="subtitle">
+            Parse and visualize CityGML files in your browser
+          </p>
+        </header>
+
+        <div id="drop-zone" class="drop-zone">
+          <div class="drop-zone-content">
+            <svg
+              class="drop-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            <p>
+              Drop a <strong>.gml</strong> or <strong>.citygml</strong> file here
+            </p>
+            <p class="drop-hint">or click to select</p>
+            <input
+              type="file"
+              id="file-input"
+              accept=".gml,.xml,.citygml"
+              hidden
+            />
+          </div>
+        </div>
+
+        <div id="loading" class="loading hidden">
+          <div class="spinner"></div>
+          <p>Parsing CityGML file...</p>
+        </div>
+
+        <div id="error" class="error hidden">
+          <p id="error-message"></p>
+        </div>
+
+        <footer>
+          <p>
+            <a href="https://github.com/cwbudde/go-citygml" target="_blank"
+              >go-citygml</a
+            >
+            &mdash; Open source CityGML parser written in Go, running as
+            WebAssembly
+          </p>
+        </footer>
+      </div>
+
+      <!-- Visualization view -->
+      <div id="viz-view" class="view">
+        <div class="viz-header">
+          <div class="viz-header-left">
+            <h2 id="file-name"></h2>
+            <span id="file-meta" class="file-meta"></span>
+          </div>
+          <button id="new-file-btn" class="btn">New File</button>
+        </div>
+
+        <div class="viz-layout">
+          <div class="viz-main">
+            <div class="viz-toggle">
+              <button class="viz-toggle-btn active" data-view="map">
+                2D Map
+              </button>
+              <button class="viz-toggle-btn" data-view="scene">
+                3D Scene
+              </button>
+            </div>
+            <div id="map-container" class="viz-canvas active">
+              <div id="map"></div>
+            </div>
+            <div id="scene-container" class="viz-canvas">
+              <canvas id="scene-canvas"></canvas>
+              <div class="scene-controls">
+                <label
+                  ><input type="checkbox" id="wireframe-toggle" />
+                  Wireframe</label
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="viz-sidebar">
+            <div class="sidebar-tabs">
+              <button class="sidebar-tab active" data-tab="summary">
+                Summary
+              </button>
+              <button class="sidebar-tab" data-tab="objects">Objects</button>
+              <button class="sidebar-tab" data-tab="validation">
+                Validation
+              </button>
+            </div>
+
+            <div id="tab-summary" class="sidebar-content active">
+              <table class="info-table" id="summary-table"></table>
+            </div>
+
+            <div id="tab-objects" class="sidebar-content">
+              <div id="objects-list" class="objects-list"></div>
+            </div>
+
+            <div id="tab-validation" class="sidebar-content">
+              <div id="validation-list" class="validation-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="wasm_exec.js"></script>
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
