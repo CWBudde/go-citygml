@@ -1,0 +1,125 @@
+{
+  "Version": "2.0",
+  "SRSName": "EPSG:25832",
+  "CRS": {
+    "Raw": "EPSG:25832",
+    "Code": 25832,
+    "IsYXOrder": false
+  },
+  "Buildings": [
+    {
+      "ID": "BLDG_ZE_001",
+      "Class": "",
+      "Function": "",
+      "Usage": "",
+      "MeasuredHeight": 0,
+      "HasMeasuredHeight": false,
+      "DerivedHeight": 8,
+      "LoD": "1",
+      "Solid": null,
+      "MultiSurface": {
+        "Polygons": [
+          {
+            "Exterior": {
+              "Points": [
+                {
+                  "X": 500000,
+                  "Y": 5700000,
+                  "Z": 100
+                },
+                {
+                  "X": 500020,
+                  "Y": 5700000,
+                  "Z": 100
+                },
+                {
+                  "X": 500020,
+                  "Y": 5700015,
+                  "Z": 100
+                },
+                {
+                  "X": 500000,
+                  "Y": 5700015,
+                  "Z": 100
+                },
+                {
+                  "X": 500000,
+                  "Y": 5700000,
+                  "Z": 100
+                }
+              ]
+            },
+            "Interior": null
+          },
+          {
+            "Exterior": {
+              "Points": [
+                {
+                  "X": 500000,
+                  "Y": 5700000,
+                  "Z": 108
+                },
+                {
+                  "X": 500020,
+                  "Y": 5700000,
+                  "Z": 108
+                },
+                {
+                  "X": 500020,
+                  "Y": 5700015,
+                  "Z": 108
+                },
+                {
+                  "X": 500000,
+                  "Y": 5700015,
+                  "Z": 108
+                },
+                {
+                  "X": 500000,
+                  "Y": 5700000,
+                  "Z": 108
+                }
+              ]
+            },
+            "Interior": null
+          }
+        ]
+      },
+      "BoundedBy": null,
+      "Footprint": {
+        "Exterior": {
+          "Points": [
+            {
+              "X": 500000,
+              "Y": 5700000,
+              "Z": 0
+            },
+            {
+              "X": 500020,
+              "Y": 5700000,
+              "Z": 0
+            },
+            {
+              "X": 500020,
+              "Y": 5700015,
+              "Z": 0
+            },
+            {
+              "X": 500000,
+              "Y": 5700015,
+              "Z": 0
+            },
+            {
+              "X": 500000,
+              "Y": 5700000,
+              "Z": 0
+            }
+          ]
+        },
+        "Interior": null
+      }
+    }
+  ],
+  "Terrains": null,
+  "GenericObjects": null
+}

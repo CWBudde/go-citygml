@@ -1,0 +1,40 @@
+{
+  "Version": "2.0",
+  "SRSName": "",
+  "CRS": {
+    "Raw": "",
+    "Code": 0,
+    "IsYXOrder": false
+  },
+  "Buildings": [
+    {
+      "ID": "B1",
+      "Class": "",
+      "Function": "",
+      "Usage": "",
+      "MeasuredHeight": 10,
+      "HasMeasuredHeight": true,
+      "DerivedHeight": 0,
+      "LoD": "",
+      "Solid": null,
+      "MultiSurface": null,
+      "BoundedBy": null,
+      "Footprint": null
+    }
+  ],
+  "Terrains": null,
+  "GenericObjects": [
+    {
+      "ID": "BR1",
+      "Type": "Bridge"
+    },
+    {
+      "ID": "TN1",
+      "Type": "Tunnel"
+    },
+    {
+      "ID": "RD1",
+      "Type": "Road"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "Version": "2.0",
+  "SRSName": "EPSG:25832",
+  "CRS": {
+    "Raw": "EPSG:25832",
+    "Code": 25832,
+    "IsYXOrder": false
+  },
+  "Buildings": [
+    {
+      "ID": "BLDG_A",
+      "Class": "",
+      "Function": "",
+      "Usage": "",
+      "MeasuredHeight": 5,
+      "HasMeasuredHeight": true,
+      "DerivedHeight": 0,
+      "LoD": "",
+      "Solid": null,
+      "MultiSurface": null,
+      "BoundedBy": null,
+      "Footprint": null
+    },
+    {
+      "ID": "BLDG_B",
+      "Class": "1120",
+      "Function": "",
+      "Usage": "",
+      "MeasuredHeight": 10,
+      "HasMeasuredHeight": true,
+      "DerivedHeight": 0,
+      "LoD": "",
+      "Solid": null,
+      "MultiSurface": null,
+      "BoundedBy": null,
+      "Footprint": null
+    },
+    {
+      "ID": "BLDG_C",
+      "Class": "",
+      "Function": "commercial",
+      "Usage": "",
+      "MeasuredHeight": 25,
+      "HasMeasuredHeight": true,
+      "DerivedHeight": 0,
+      "LoD": "",
+      "Solid": null,
+      "MultiSurface": null,
+      "BoundedBy": null,
+      "Footprint": null
+    }
+  ],
+  "Terrains": null,
+  "GenericObjects": null
+}
