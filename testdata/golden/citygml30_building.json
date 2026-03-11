@@ -1,0 +1,27 @@
+{
+  "Version": "3.0",
+  "SRSName": "urn:ogc:def:crs:EPSG::25833",
+  "CRS": {
+    "Raw": "urn:ogc:def:crs:EPSG::25833",
+    "Code": 25833,
+    "IsYXOrder": false
+  },
+  "Buildings": [
+    {
+      "ID": "BLDG_30_001",
+      "Class": "office",
+      "Function": "",
+      "Usage": "",
+      "MeasuredHeight": 18,
+      "HasMeasuredHeight": true,
+      "DerivedHeight": 0,
+      "LoD": "",
+      "Solid": null,
+      "MultiSurface": null,
+      "BoundedBy": null,
+      "Footprint": null
+    }
+  ],
+  "Terrains": null,
+  "GenericObjects": null
+}

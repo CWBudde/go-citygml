@@ -145,27 +145,28 @@ This plan defines a standalone Go library for reading and normalizing CityGML da
 
 ## Phase 9 — Application integration helpers
 
-- [ ] Add optional helper package(s) for downstream mapping
-  - [ ] building footprints
-  - [ ] height extraction
-  - [ ] terrain mesh / polygon summaries
-- [ ] Keep these helpers generic and not Aconiq-specific
-- [ ] Decide whether GeoJSON conversion helpers belong here or in downstream apps
+- [x] Add optional helper package(s) for downstream mapping
+  - [x] building footprints
+  - [x] height extraction
+  - [x] terrain mesh / polygon summaries
+- [x] Keep these helpers generic and not Aconiq-specific
+- [x] Decide whether GeoJSON conversion helpers belong here or in downstream apps
+  - Decision: included as `geojson/` package — lightweight, no external deps, useful for quick visualization
 
 ---
 
 ## Phase 10 — Test corpus and fixtures
 
-- [ ] Add repo-safe synthetic CityGML fixtures
-- [ ] Add fixtures for
-  - [ ] measured height present
-  - [ ] height from Z extents
-  - [ ] multiple buildings
-  - [ ] unsupported object types
-  - [ ] malformed rings / malformed `posList`
-  - [ ] namespace/version variation
-- [ ] Add snapshot tests for normalized object output
-- [ ] Add property/fuzz tests for coordinate parsing and geometry robustness
+- [x] Add repo-safe synthetic CityGML fixtures
+- [x] Add fixtures for
+  - [x] measured height present
+  - [x] height from Z extents
+  - [x] multiple buildings
+  - [x] unsupported object types
+  - [x] malformed rings / malformed `posList`
+  - [x] namespace/version variation
+- [x] Add snapshot tests for normalized object output
+- [x] Add property/fuzz tests for coordinate parsing and geometry robustness
 
 ---
 
