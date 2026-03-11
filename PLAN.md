@@ -184,9 +184,10 @@ This plan defines a standalone Go library for reading and normalizing CityGML da
 
 ## Phase 12 — Release readiness
 
-- [ ] Finalize public API stability for `v0.x` or `v1`
-- [ ] Publish usage examples
-- [ ] Add changelog and migration notes
+- [x] Finalize public API stability for `v0.x` or `v1`
+  - Decision: release as `v0.1.0` (v0.x allows breaking changes per CONTRIBUTING.md)
+- [x] Publish usage examples
+- [x] Add changelog and migration notes
 - [ ] Tag the first release
 
 ---
@@ -196,18 +197,3 @@ This plan defines a standalone Go library for reading and normalizing CityGML da
 - [ ] Replace Aconiq’s local `citygmlimport` implementation with this library once the building scope is feature-complete
 - [ ] Keep Aconiq-specific mapping from generic city objects into the normalized noise model inside Aconiq
 - [ ] Add an adapter layer instead of leaking Aconiq types into this library
-
----
-
-## Suggested first delivery
-
-The first worthwhile release should likely be:
-
-- CityGML building-only support
-- common `2.0` namespaces first
-- `lod1Solid` / `lod1MultiSurface`
-- measured height + Z-extent fallback
-- deterministic footprint extraction
-- repo-safe fixtures and strong validation errors
-
-That is enough to let Aconiq depend on the library without forcing premature support for the entire CityGML ecosystem.
