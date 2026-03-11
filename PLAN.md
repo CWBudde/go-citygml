@@ -188,7 +188,7 @@ This plan defines a standalone Go library for reading and normalizing CityGML da
   - Decision: release as `v0.1.0` (v0.x allows breaking changes per CONTRIBUTING.md)
 - [x] Publish usage examples
 - [x] Add changelog and migration notes
-- [ ] Tag the first release
+- [x] Tag the first release (`v0.1.0`)
 
 ---
 
