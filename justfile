@@ -59,3 +59,7 @@ build-wasm:
 # Clean build artifacts
 clean:
     rm -f coverage.out coverage.html citygml web/citygml.wasm web/wasm_exec.js
+
+fix:
+    just lint-fix
+    just fmt
