@@ -240,8 +240,8 @@ neither can be fixed in isolation:
       against `testdata/golden/*.json`, but `treefmt.toml`'s prettier step
       formats `*.json` and appends a trailing newline. Fix by excluding
       `testdata/golden/**` (or `testdata/**`) from prettier in `treefmt.toml`,
-      then regenerate goldens with `go test ./citygml -run TestSnapshot
-      -update-golden`. (Belt-and-braces: also `strings.TrimRight` in the
+      then regenerate the goldens by running the snapshot test with the
+      `-update-golden` flag. (Belt-and-braces: also `strings.TrimRight` in the
       comparison so the test is newline-tolerant.)
 - [ ] **Format check fails.** `.golangci.yml` is not prettier-formatted (last
       edited by `98928ff` without a formatter run). Run `treefmt` / `just fmt`
@@ -259,7 +259,7 @@ neither can be fixed in isolation:
       guessing.
 - [ ] **`cityObjectMember` sibling-skip.** `internal/xmlscan/document.go:92`
       calls `StartElement()`, which scans forward across element boundaries; an
-      empty or xlink-only member consumes the *next* member's start tag. Bound
+      empty or xlink-only member consumes the _next_ member's start tag. Bound
       the scan to the current member's depth.
 - [ ] **WASM entry point unsafe on bad input.** `cmd/citygmlwasm/main.go`:
       (a) add `defer/recover` in `parseCityGML` — one panic kills the instance

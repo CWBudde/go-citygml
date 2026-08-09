@@ -68,4 +68,9 @@ includes = [
 excludes = [
     # Exclude potentially sensitive or auto-generated files
     "**/*.sops.*",
+
+    # Golden snapshot files are compared byte-for-byte against
+    # json.MarshalIndent output (no trailing newline); prettier would add one
+    # and break citygml/snapshot_test.go.
+    "testdata/golden/**",
 ]
