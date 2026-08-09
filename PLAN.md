@@ -224,6 +224,136 @@ This plan defines a standalone Go library for reading and normalizing CityGML da
 
 ---
 
+## Phase 14 — Quality & correctness remediation
+
+Added after a full repository quality review (Aug 2026). Findings are grouped by
+priority. Every item cites the file(s) to change. Check items off as they land.
+
+### P0 — CI is red on `main`; unblock it first
+
+The `Tests` workflow has failed on every push to `main` since March 2026. Two
+jobs fail, and they impose contradictory requirements on the golden files, so
+neither can be fixed in isolation:
+
+- [ ] **Snapshot tests fail on a clean checkout.** `citygml/snapshot_test.go`
+      compares `json.MarshalIndent` output (no trailing newline) byte-for-byte
+      against `testdata/golden/*.json`, but `treefmt.toml`'s prettier step
+      formats `*.json` and appends a trailing newline. Fix by excluding
+      `testdata/golden/**` (or `testdata/**`) from prettier in `treefmt.toml`,
+      then regenerate goldens with `go test ./citygml -run TestSnapshot
+      -update-golden`. (Belt-and-braces: also `strings.TrimRight` in the
+      comparison so the test is newline-tolerant.)
+- [ ] **Format check fails.** `.golangci.yml` is not prettier-formatted (last
+      edited by `98928ff` without a formatter run). Run `treefmt` / `just fmt`
+      and commit the result.
+- [ ] Verify locally that `just ci` (`check-formatted test lint check-tidy`)
+      passes end-to-end before pushing.
+
+### P1 — Correctness bugs (silent data corruption / crashes)
+
+- [ ] **2D posList decoded as 3D.** `gml/coords.go:80 inferDimensionality`
+      guesses 3D whenever the value count is divisible by 3; `srsDimension` is
+      never read anywhere in the codebase. A 2D ring with a 3-divisible count is
+      silently corrupted. Read the `srsDimension` attribute on
+      `gml:pos`/`gml:posList` and thread it through `gml/parse.go` instead of
+      guessing.
+- [ ] **`cityObjectMember` sibling-skip.** `internal/xmlscan/document.go:92`
+      calls `StartElement()`, which scans forward across element boundaries; an
+      empty or xlink-only member consumes the *next* member's start tag. Bound
+      the scan to the current member's depth.
+- [ ] **WASM entry point unsafe on bad input.** `cmd/citygmlwasm/main.go`:
+      (a) add `defer/recover` in `parseCityGML` — one panic kills the instance
+      for the page's lifetime; (b) validate `args[0]` is a `Uint8Array` before
+      `ua.Get("length").Int()`; (c) guard `bbox.Empty` before emitting
+      `bounds`, which currently leak `±math.MaxFloat64` for empty documents.
+- [ ] **`measuredHeight` accepts NaN/Inf/negative.**
+      `internal/decode/building.go:77` uses `strconv.ParseFloat` with no
+      finiteness check (unlike `gml/coords.go`'s `parseFloat`). Reject
+      non-finite values.
+- [ ] **DOM-XSS in the web viewer.** `web/modules/map.js:146-163` interpolates
+      unescaped user-file values (`id`, `class`, `function`, `lod`, …) into
+      popup HTML via `setHTML`. `sidebar.js` already routes through
+      `escapeHtml()`; map.js must too (or build nodes with `textContent`).
+
+### P2 — API, conformance & correctness-adjacent
+
+- [ ] **GeoJSON is not RFC 7946 conformant despite `doc.go`'s claim.**
+      `geojson/geojson.go`: (a) a `Solid` shell is emitted as a 2D
+      MultiPolygon (`:131`) — overlapping/degenerate polygons; derive a
+      footprint instead; (b) coordinates are emitted in the source projected
+      CRS, not WGS84, and `types.CRS.IsYXOrder` is ignored (`ringCoords`).
+      Either reproject / honour axis order, or soften the "RFC 7946 compliant"
+      claim and document the limitation.
+- [ ] **Inconsistent `Options` API.** `citygml/options.go` mixes `bool`
+      (`Strict`) and `*bool` (`DeriveHeights`, `DeriveFootprints`). Replace with
+      inverted plain bools or functional options; document the partial-doc-on-
+      error contract of `Read` (`read.go:86`).
+- [ ] **CLI is thin and noisy.** `cmd/citygml/cli`: set
+      `SilenceUsage`/`SilenceErrors` (validation failures currently dump full
+      usage); remove double parse/validation error reporting; expose
+      `--strict`/`--json` so library capabilities are reachable.
+- [ ] **De-duplicate drifting logic.** Height selection is reimplemented three
+      times (`helpers.BuildingHeight`, `geojson.BuildingFeature`, wasm
+      `buildScene`/`buildObjects`) with subtly different rules (`>0` vs
+      `HasMeasuredHeight`); geometry flattening is copied across `helpers`,
+      `gml/derive`, and wasm. Collapse to shared helpers.
+- [ ] **Extract the copy-pasted "drain-to-matching-end" loop** (~7 sites in
+      `gml/parse.go` + `internal/decode`) into one documented `Scanner` helper;
+      the manual `depth++/depth--` convention is the core fragility of the
+      parser.
+- [ ] **Three.js resource leaks.** `web/modules/scene.js`: `destroyScene` never
+      disposes geometries/materials, never `disconnect()`s the `ResizeObserver`,
+      and re-adds the canvas click listener on every re-init.
+- [ ] **Unsupported CRS blanks the map silently.** `web/modules/map.js`
+      reprojection only handles ETRS89/WGS84 UTM; anything else yields an empty
+      map with no message. Surface a "cannot locate — unsupported CRS" notice.
+
+### P3 — Tests, tooling, docs & hygiene
+
+- [ ] **Zero coverage on `cmd/`** (CLI + WASM, the actual deliverables). Add
+      cobra command tests (`SetArgs`/`SetOut`, exit codes) and extract+test the
+      WASM conversion logic.
+- [ ] **Dead malformed fixtures.** `testdata/malformed_ring.gml` and
+      `malformed_poslist.gml` are referenced by no test. Wire them into
+      error-path tests (covers the least-tested parser branches, ~65% in
+      `internal/decode`) or delete them.
+- [ ] **Add a coverage gate** (`-coverprofile` + floor, or Codecov) to
+      `test-unit.yml`; nothing in CI observes the 78% coverage today.
+- [ ] **Pin supply chain.** SHA-pin third-party actions
+      (`softprops/action-gh-release`, `isbecker/treefmt-action`,
+      `golangci/golangci-lint-action`) and pin `gofumpt/gci/shfmt/prettier`
+      versions in `test-format.yml` (currently `@latest`). Add SRI hashes (or
+      vendor) for the maplibre/three CDN scripts in `web/index.html`.
+- [ ] **Module-path casing.** `go.mod` declares `github.com/cwbudde/...`
+      (lowercase) but the canonical repo is `github.com/CWBudde/...`;
+      `go install github.com/CWBudde/...@latest` fails. Pick one casing across
+      `go.mod`, README, and LICENSE.
+- [ ] **Release/version metadata is fictional.** No git tag exists, yet
+      CHANGELOG and PLAN claim `v0.1.0` shipped and `release-binaries.yml` only
+      fires on tags — so no release binary was ever built. Either tag `v0.1.0`
+      or stop claiming it.
+- [ ] **Docs drift.** Check off Phase 13 below (WASM demo is fully implemented);
+      fix the `helpers.BoundingBox()` → `DocumentBBox()` reference at
+      `PLAN.md:204`; update CHANGELOG for the WASM/web work; correct
+      `CONTRIBUTING.md` (says Go 1.23+, repo requires 1.25; documents
+      `gofmt`/`go vet` instead of the real `just`/`treefmt`/`golangci` flow).
+- [ ] **Missing community files:** `SECURITY.md`, `CODE_OF_CONDUCT.md`, issue/PR
+      templates.
+- [ ] **Restrict `release-binaries.yml`** to `v*` tags instead of `"*"`.
+- [ ] **Web a11y:** the drop zone (`div` + click), view-toggle, and sidebar
+      tabs/list rows are not keyboard- or screen-reader-accessible.
+
+### Deferred / decisions needed (not obviously "fix")
+
+- Whether to actually reproject GeoJSON to WGS84 (contradicts the stated v1
+  non-goal "CRS reprojection engine") or just document the limitation.
+- Whether the `Dimensionality` return triple threaded through `gml/parse.go`
+  (discarded by every caller) should be consumed or removed.
+- Whether to prune dead API surface: `xmlscan.CityObjectMember`/`RawXML`,
+  `Element.XLinkHref` (extracted, never read — no xlink resolution exists).
+
+---
+
 ## Integration with Aconiq
 
 - [x] Replace Aconiq’s local `citygmlimport` implementation with this library once the building scope is feature-complete
