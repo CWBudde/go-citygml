@@ -11,6 +11,9 @@ import (
 	"github.com/cwbudde/go-citygml/types"
 )
 
+// reliefFeatureElement is the CityGML element name for a relief feature container.
+const reliefFeatureElement = "ReliefFeature"
+
 // IsTerrainElement returns true if the element is a recognized terrain/relief element.
 func IsTerrainElement(elem *xmlscan.Element) bool {
 	ns := elem.Namespace()
@@ -18,7 +21,7 @@ func IsTerrainElement(elem *xmlscan.Element) bool {
 
 	if ns == xmlscan.NSCityGML20Dem || ns == xmlscan.NSCityGML30Dem {
 		switch local {
-		case "ReliefFeature", "TINRelief", "MassPointRelief", "BreaklineRelief", "RasterRelief":
+		case reliefFeatureElement, "TINRelief", "MassPointRelief", "BreaklineRelief", "RasterRelief":
 			return true
 		}
 	}
@@ -31,7 +34,7 @@ func IsTerrainElement(elem *xmlscan.Element) bool {
 // It handles ReliefFeature (which may contain nested relief components)
 // and direct TINRelief elements.
 func Terrain(elem *xmlscan.Element, sc *xmlscan.Scanner) ([]types.Terrain, error) {
-	if elem.LocalName() == "ReliefFeature" {
+	if elem.LocalName() == reliefFeatureElement {
 		return decodeReliefFeature(elem, sc)
 	}
 	// Direct relief component (e.g. TINRelief at top level).

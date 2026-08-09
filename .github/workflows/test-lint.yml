@@ -22,4 +22,8 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v8
         with:
+          # Pin the linter version so CI results are reproducible: an
+          # unpinned "latest" silently changes which linters/rules run and
+          # can turn CI red on an unrelated PR (as goconst did on v2.12.2).
+          version: v2.12.2
           args: --timeout=5m ./...

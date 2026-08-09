@@ -6,6 +6,14 @@ import (
 	"github.com/cwbudde/go-citygml/types"
 )
 
+// GeoJSON object type tags (RFC 7946).
+const (
+	typeFeature           = "Feature"
+	typeFeatureCollection = "FeatureCollection"
+	typePolygon           = "Polygon"
+	typeMultiPolygon      = "MultiPolygon"
+)
+
 // Geometry represents a GeoJSON geometry object.
 type Geometry struct {
 	Type        string          `json:"type"`
@@ -29,7 +37,7 @@ type FeatureCollection struct {
 // NewFeatureCollection creates an empty FeatureCollection.
 func NewFeatureCollection() *FeatureCollection {
 	return &FeatureCollection{
-		Type:     "FeatureCollection",
+		Type:     typeFeatureCollection,
 		Features: []Feature{},
 	}
 }
@@ -46,7 +54,7 @@ func PolygonGeometry(poly types.Polygon) *Geometry {
 	coords := marshalCoordinates(rings)
 
 	return &Geometry{
-		Type:        "Polygon",
+		Type:        typePolygon,
 		Coordinates: coords,
 	}
 }
@@ -68,7 +76,7 @@ func MultiPolygonGeometry(ms types.MultiSurface) *Geometry {
 	coords := marshalCoordinates(polys)
 
 	return &Geometry{
-		Type:        "MultiPolygon",
+		Type:        typeMultiPolygon,
 		Coordinates: coords,
 	}
 }
@@ -133,7 +141,7 @@ func BuildingFeature(b *types.Building) Feature {
 	}
 
 	return Feature{
-		Type:       "Feature",
+		Type:       typeFeature,
 		ID:         b.ID,
 		Geometry:   geom,
 		Properties: props,
@@ -152,7 +160,7 @@ func TerrainFeature(t *types.Terrain) Feature {
 	}
 
 	return Feature{
-		Type:       "Feature",
+		Type:       typeFeature,
 		ID:         t.ID,
 		Geometry:   geom,
 		Properties: props,
