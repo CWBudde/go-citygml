@@ -5,6 +5,7 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -80,7 +81,11 @@ func testSnapshot(t *testing.T, inputPath, goldenPath string) {
 		t.Fatalf("reading golden file (run with -update-golden to create): %v", err)
 	}
 
-	if string(got) != string(want) {
+	// Compare newline-tolerantly: json.MarshalIndent emits no trailing
+	// newline, but editors and formatters routinely add one to committed
+	// golden files. Trimming trailing whitespace keeps the test robust
+	// against that without weakening the structural comparison.
+	if strings.TrimRight(string(got), "\n") != strings.TrimRight(string(want), "\n") {
 		t.Errorf("snapshot mismatch for %s\ngot:\n%s\nwant:\n%s", inputPath, got, want)
 	}
 }

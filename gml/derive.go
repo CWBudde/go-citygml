@@ -6,6 +6,9 @@ import (
 	"github.com/cwbudde/go-citygml/types"
 )
 
+// groundSurfaceType is the CityGML bounded-surface type preferred for footprint derivation.
+const groundSurfaceType = "GroundSurface"
+
 // DeriveHeight computes a building height from the Z extents of its geometry.
 // It returns maxZ - minZ across all coordinates found in the geometry sources.
 // Returns 0 if no 3D coordinates are available.
@@ -52,7 +55,7 @@ func DeriveHeight(solid *types.Solid, ms *types.MultiSurface, bounded []types.Su
 func DeriveFootprint(solid *types.Solid, ms *types.MultiSurface, bounded []types.Surface) *types.Polygon {
 	// Strategy 1: Use GroundSurface if available.
 	for _, surf := range bounded {
-		if surf.Type == "GroundSurface" && len(surf.Geometry.Polygons) > 0 {
+		if surf.Type == groundSurfaceType && len(surf.Geometry.Polygons) > 0 {
 			proj := projectPolygon(surf.Geometry.Polygons[0])
 			return &proj
 		}

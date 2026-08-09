@@ -59,13 +59,16 @@ func Validate(doc *types.Document) []Finding {
 	return findings
 }
 
+// pathDocument is the object-path label used for document-level findings.
+const pathDocument = "Document"
+
 func validateDocumentMeta(doc *types.Document) []Finding {
 	var findings []Finding
 
 	if doc.Version == "" {
 		findings = append(findings, Finding{
 			Severity: SeverityWarning,
-			Path:     "Document",
+			Path:     pathDocument,
 			Message:  "CityGML version not detected",
 		})
 	}
@@ -73,13 +76,13 @@ func validateDocumentMeta(doc *types.Document) []Finding {
 	if doc.SRSName == "" {
 		findings = append(findings, Finding{
 			Severity: SeverityWarning,
-			Path:     "Document",
+			Path:     pathDocument,
 			Message:  "no srsName (CRS) declared",
 		})
 	} else if doc.CRS.Code == 0 {
 		findings = append(findings, Finding{
 			Severity: SeverityWarning,
-			Path:     "Document",
+			Path:     pathDocument,
 			Message:  fmt.Sprintf("srsName %q could not be parsed to an EPSG code", doc.SRSName),
 		})
 	}
@@ -87,7 +90,7 @@ func validateDocumentMeta(doc *types.Document) []Finding {
 	if len(doc.Buildings) == 0 && len(doc.Terrains) == 0 && len(doc.GenericObjects) == 0 {
 		findings = append(findings, Finding{
 			Severity: SeverityWarning,
-			Path:     "Document",
+			Path:     pathDocument,
 			Message:  "document contains no city objects",
 		})
 	}
