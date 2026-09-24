@@ -235,3 +235,32 @@ func TestFromDocument_BuildingParts(t *testing.T) {
 		t.Error("parent without own geometry should have a null geometry")
 	}
 }
+
+// A parent without a gml:id still has parts, and they must stay parts.
+func TestFromDocument_PartsOfParentWithoutID(t *testing.T) {
+	square := types.Polygon{Exterior: types.Ring{Points: []types.Point{
+		{X: 0, Y: 0}, {X: 1, Y: 0}, {X: 1, Y: 1}, {X: 0, Y: 0},
+	}}}
+
+	doc := &types.Document{Buildings: []types.Building{{
+		Parts: []types.Building{{ID: "P1", Footprint: &square}},
+	}}}
+
+	fc := FromDocument(doc)
+	if len(fc.Features) != 2 {
+		t.Fatalf("got %d features, want 2", len(fc.Features))
+	}
+
+	part := fc.Features[1]
+	if part.Properties["type"] != typeBuildingPart {
+		t.Errorf("part type = %v, want %q", part.Properties["type"], typeBuildingPart)
+	}
+
+	if parent, ok := part.Properties["parent"]; !ok || parent != "" {
+		t.Errorf("part parent = %v (present %v), want empty string", parent, ok)
+	}
+
+	if fc.Features[0].Properties["type"] == typeBuildingPart {
+		t.Error("top-level building must not be marked as a part")
+	}
+}

@@ -176,7 +176,7 @@ func FromDocument(doc *types.Document) *FeatureCollection {
 	fc := NewFeatureCollection()
 
 	for i := range doc.Buildings {
-		fc.Features = appendBuildingFeatures(fc.Features, &doc.Buildings[i], "")
+		fc.Features = appendBuildingFeatures(fc.Features, &doc.Buildings[i], false, "")
 	}
 
 	for i := range doc.Terrains {
@@ -187,17 +187,19 @@ func FromDocument(doc *types.Document) *FeatureCollection {
 }
 
 // appendBuildingFeatures appends the feature for b followed by the features
-// of its parts, depth-first. parentID is empty for a top-level building.
-func appendBuildingFeatures(features []Feature, b *types.Building, parentID string) []Feature {
+// of its parts, depth-first. isPart is tracked on its own rather than read off
+// parentID, because a parent without a gml:id still has parts: those keep
+// "type": "BuildingPart" and carry an empty "parent".
+func appendBuildingFeatures(features []Feature, b *types.Building, isPart bool, parentID string) []Feature {
 	f := BuildingFeature(b)
-	if parentID != "" {
+	if isPart {
 		f.Properties["type"] = typeBuildingPart
 		f.Properties["parent"] = parentID
 	}
 
 	features = append(features, f)
 	for i := range b.Parts {
-		features = appendBuildingFeatures(features, &b.Parts[i], b.ID)
+		features = appendBuildingFeatures(features, &b.Parts[i], true, b.ID)
 	}
 
 	return features
