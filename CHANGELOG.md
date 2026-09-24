@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+Planned as v0.3.0.
+
+### Added
+
+- **CityGML 1.0**: documents in the CityGML 1.0 namespaces (core, building, relief, transportation, vegetation, generics, appearance, cityobjectgroup) are decoded like 2.0 and report `Version` `"1.0"`. This covers AdV/LGLN LoD2 tiles, which previously yielded no buildings.
+- **BuildingPart**: `bldg:consistsOfBuildingPart` (1.0/2.0) and `bldg:buildingPart` (3.0) are decoded recursively into the new `types.Building.Parts` field. Each part carries its own ID, attributes, measured or derived height, geometry, semantic surfaces and footprint.
+- `helpers.FlattenBuildings` returns every building and building part depth-first.
+- **Compound CRS**: `EPSG:25832+7837`, `urn:ogc:def:crs,crs:EPSG::25832,crs:EPSG::7837` and `http://www.opengis.net/def/crs-compound?1=…&2=…` resolve to the horizontal EPSG code.
+- **srsDimension**: an `srsDimension` on a `posList`/`pos` or on an enclosing geometry now decides the coordinate dimensionality; the root envelope's value is used as a hint. Guessing from divisibility by 3 is only the last fallback.
+
+### Changed
+
+- `Validate` no longer warns about missing height or geometry on a building that has parts, and validates each part under `Building[i](id)/Part[j](id)`.
+- `helpers.DocumentBBox` includes building-part geometry.
+- `geojson.FromDocument` emits one feature per building part (type `BuildingPart`, with a `parent` property) after its parent's feature.
+- Golden snapshots include the new `Parts` field.
+
+### Fixed
+
+- `DeriveFootprint` returns the largest-area polygon over all GroundSurface polygons (holes included) instead of the first polygon of the first GroundSurface.
+
 ## [0.1.0] - 2026-03-11
 
 ### Added
