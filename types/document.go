@@ -2,7 +2,7 @@ package types
 
 // Document represents a parsed and normalized CityGML document.
 type Document struct {
-	// Version is the detected CityGML version (e.g. "2.0", "3.0").
+	// Version is the detected CityGML version (e.g. "1.0", "2.0", "3.0").
 	Version string
 
 	// SRSName is the raw srsName string from the document (from root attributes or gml:Envelope).

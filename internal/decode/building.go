@@ -24,7 +24,7 @@ const (
 // IsBuildingElement returns true if the element is a recognized building element.
 func IsBuildingElement(elem *xmlscan.Element) bool {
 	ns := elem.Namespace()
-	return ns == xmlscan.NSCityGML20Bldg || ns == xmlscan.NSCityGML30Bldg
+	return ns == xmlscan.NSCityGML10Bldg || ns == xmlscan.NSCityGML20Bldg || ns == xmlscan.NSCityGML30Bldg
 }
 
 // Building decodes a Building element from the scanner.

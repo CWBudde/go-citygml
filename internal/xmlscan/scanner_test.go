@@ -41,6 +41,20 @@ func TestDetectVersion20(t *testing.T) {
 	}
 }
 
+func TestDetectVersion10(t *testing.T) {
+	input := `<core:CityModel xmlns:core="http://www.opengis.net/citygml/1.0" xmlns:gml="http://www.opengis.net/gml"/>`
+	sc := NewScanner(strings.NewReader(input))
+
+	_, err := sc.StartElement()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if sc.DetectedVersion != Version10 {
+		t.Errorf("got version %q, want %q", sc.DetectedVersion, Version10)
+	}
+}
+
 func TestDetectVersion30(t *testing.T) {
 	sc := NewScanner(strings.NewReader(minimalCityGML30))
 

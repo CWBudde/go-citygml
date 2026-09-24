@@ -19,7 +19,7 @@ func IsTerrainElement(elem *xmlscan.Element) bool {
 	ns := elem.Namespace()
 	local := elem.LocalName()
 
-	if ns == xmlscan.NSCityGML20Dem || ns == xmlscan.NSCityGML30Dem {
+	if ns == xmlscan.NSCityGML10Dem || ns == xmlscan.NSCityGML20Dem || ns == xmlscan.NSCityGML30Dem {
 		switch local {
 		case reliefFeatureElement, "TINRelief", "MassPointRelief", "BreaklineRelief", "RasterRelief":
 			return true
