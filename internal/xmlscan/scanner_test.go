@@ -220,3 +220,78 @@ func TestDetectVersionUnknown(t *testing.T) {
 		t.Errorf("got version %q, want unknown", sc.DetectedVersion)
 	}
 }
+
+func TestSRSDimensionScopes(t *testing.T) {
+	input := `<root xmlns:gml="http://www.opengis.net/gml">
+		<gml:Polygon srsDimension="2">
+			<gml:posList srsDimension="3">0 0 0</gml:posList>
+			<gml:pos>0 0</gml:pos>
+		</gml:Polygon>
+		<gml:pos>0 0 0</gml:pos>
+	</root>`
+
+	sc := NewScanner(strings.NewReader(input))
+
+	var got []int
+
+	for {
+		elem, err := sc.StartElement()
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+
+			t.Fatal(err)
+		}
+
+		if elem.LocalName() == "posList" || elem.LocalName() == "pos" {
+			got = append(got, sc.SRSDimension())
+		}
+	}
+
+	want := []int{3, 2, 0}
+	if len(got) != len(want) {
+		t.Fatalf("got %v, want %v", got, want)
+	}
+
+	for i := range want {
+		if got[i] != want[i] {
+			t.Errorf("SRSDimension at element %d = %d, want %d", i, got[i], want[i])
+		}
+	}
+}
+
+func TestDefaultSRSDimensionFromEnvelopeCorner(t *testing.T) {
+	input := `<CityModel xmlns="http://www.opengis.net/citygml/1.0" xmlns:gml="http://www.opengis.net/gml">
+		<gml:boundedBy>
+			<gml:Envelope srsName="EPSG:25832">
+				<gml:lowerCorner srsDimension="3">0 0 0</gml:lowerCorner>
+				<gml:upperCorner srsDimension="3">1 1 1</gml:upperCorner>
+			</gml:Envelope>
+		</gml:boundedBy>
+	</CityModel>`
+
+	sc := NewScanner(strings.NewReader(input))
+
+	hdr, err := ReadHeader(sc)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if hdr.Version != Version10 {
+		t.Errorf("Version = %q, want %q", hdr.Version, Version10)
+	}
+
+	err = EachCityObjectMember(sc, hdr, func(_ *Element, sc *Scanner) error { return sc.Skip() })
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if d := sc.DefaultSRSDimension(); d != 3 {
+		t.Errorf("DefaultSRSDimension = %d, want 3", d)
+	}
+
+	if d := sc.SRSDimension(); d != 0 {
+		t.Errorf("SRSDimension after envelope closed = %d, want 0", d)
+	}
+}

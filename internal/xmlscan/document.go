@@ -106,7 +106,9 @@ func EachCityObjectMember(sc *Scanner, hdr *DocumentHeader, fn func(elem *Elemen
 }
 
 // extractEnvelopeSRS reads inside a boundedBy element looking for an Envelope
-// with an srsName attribute. Sets hdr.SRSName if not already set.
+// with an srsName attribute. Sets hdr.SRSName if not already set. An
+// srsDimension on the Envelope or its corners is recorded on the scanner as a
+// document-wide dimension hint.
 func extractEnvelopeSRS(sc *Scanner, hdr *DocumentHeader) {
 	depth := 1
 	for depth > 0 {
@@ -119,12 +121,17 @@ func extractEnvelopeSRS(sc *Scanner, hdr *DocumentHeader) {
 		case xml.StartElement:
 			depth++
 
-			if t.Name.Local == "Envelope" {
+			switch t.Name.Local {
+			case "Envelope":
 				for _, attr := range t.Attr {
 					if attr.Name.Local == "srsName" && hdr.SRSName == "" {
 						hdr.SRSName = attr.Value
 					}
 				}
+
+				sc.setDefaultSRSDimension(srsDimensionAttr(t))
+			case "lowerCorner", "upperCorner":
+				sc.setDefaultSRSDimension(srsDimensionAttr(t))
 			}
 		case xml.EndElement:
 			depth--
