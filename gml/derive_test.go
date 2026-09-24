@@ -179,3 +179,117 @@ func TestDeriveFootprint_PreservesHoles(t *testing.T) {
 		t.Errorf("got %d interior rings, want 1", len(fp.Interior))
 	}
 }
+
+// square returns a closed axis-aligned square ring at height z.
+func square(x0, y0, size, z float64) types.Ring {
+	return types.Ring{Points: []types.Point{
+		{X: x0, Y: y0, Z: z},
+		{X: x0 + size, Y: y0, Z: z},
+		{X: x0 + size, Y: y0 + size, Z: z},
+		{X: x0, Y: y0 + size, Z: z},
+		{X: x0, Y: y0, Z: z},
+	}}
+}
+
+func TestDeriveFootprint_LargestGroundPolygon(t *testing.T) {
+	tests := []struct {
+		name    string
+		bounded []types.Surface
+		wantX0  float64 // X of the chosen polygon's first exterior point
+		holes   int
+	}{
+		{
+			name: "largest polygon within one GroundSurface",
+			bounded: []types.Surface{{
+				Type: groundSurfaceType,
+				Geometry: types.MultiSurface{Polygons: []types.Polygon{
+					{Exterior: square(0, 0, 2, 50)},
+					{Exterior: square(100, 0, 10, 50)},
+					{Exterior: square(200, 0, 5, 50)},
+				}},
+			}},
+			wantX0: 100,
+		},
+		{
+			name: "largest polygon across GroundSurfaces, other surfaces ignored",
+			bounded: []types.Surface{
+				{Type: "RoofSurface", Geometry: types.MultiSurface{Polygons: []types.Polygon{{Exterior: square(300, 0, 50, 60)}}}},
+				{Type: groundSurfaceType, Geometry: types.MultiSurface{Polygons: []types.Polygon{{Exterior: square(0, 0, 3, 50)}}}},
+				{Type: groundSurfaceType, Geometry: types.MultiSurface{Polygons: []types.Polygon{{Exterior: square(100, 0, 4, 50)}}}},
+			},
+			wantX0: 100,
+		},
+		{
+			name: "holes reduce the area that is compared",
+			bounded: []types.Surface{{
+				Type: groundSurfaceType,
+				Geometry: types.MultiSurface{Polygons: []types.Polygon{
+					// 10x10 minus an 8x8 hole = 36.
+					{Exterior: square(0, 0, 10, 50), Interior: []types.Ring{square(1, 1, 8, 50)}},
+					// 7x7 = 49.
+					{Exterior: square(100, 0, 7, 50)},
+				}},
+			}},
+			wantX0: 100,
+		},
+		{
+			name: "chosen polygon keeps its holes",
+			bounded: []types.Surface{{
+				Type: groundSurfaceType,
+				Geometry: types.MultiSurface{Polygons: []types.Polygon{
+					{Exterior: square(100, 0, 2, 50)},
+					{Exterior: square(0, 0, 20, 50), Interior: []types.Ring{square(5, 5, 2, 50), square(10, 10, 2, 50)}},
+				}},
+			}},
+			wantX0: 0,
+			holes:  2,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fp := DeriveFootprint(nil, nil, tt.bounded)
+			if fp == nil {
+				t.Fatal("expected footprint")
+			}
+
+			if got := fp.Exterior.Points[0].X; got != tt.wantX0 {
+				t.Errorf("chosen polygon starts at X=%g, want %g", got, tt.wantX0)
+			}
+
+			if len(fp.Interior) != tt.holes {
+				t.Errorf("got %d interior rings, want %d", len(fp.Interior), tt.holes)
+			}
+
+			for _, ring := range append([]types.Ring{fp.Exterior}, fp.Interior...) {
+				for _, pt := range ring.Points {
+					if pt.Z != 0 {
+						t.Fatalf("projected point has Z=%g, want 0", pt.Z)
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestPlanarArea(t *testing.T) {
+	tests := []struct {
+		name string
+		poly types.Polygon
+		want float64
+	}{
+		{name: "square", poly: types.Polygon{Exterior: square(0, 0, 4, 7)}, want: 16},
+		{name: "square with hole", poly: types.Polygon{Exterior: square(0, 0, 4, 0), Interior: []types.Ring{square(1, 1, 1, 0)}}, want: 15},
+		{name: "clockwise ring", poly: types.Polygon{Exterior: types.Ring{Points: []types.Point{{X: 0, Y: 0}, {X: 0, Y: 2}, {X: 3, Y: 2}, {X: 3, Y: 0}, {X: 0, Y: 0}}}}, want: 6},
+		{name: "degenerate", poly: types.Polygon{Exterior: types.Ring{Points: []types.Point{{X: 0, Y: 0}, {X: 1, Y: 1}}}}, want: 0},
+		{name: "vertical wall has no planar area", poly: types.Polygon{Exterior: types.Ring{Points: []types.Point{{X: 0, Y: 0, Z: 0}, {X: 5, Y: 0, Z: 0}, {X: 5, Y: 0, Z: 3}, {X: 0, Y: 0, Z: 3}, {X: 0, Y: 0, Z: 0}}}}, want: 0},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := planarArea(tt.poly); got != tt.want {
+				t.Errorf("planarArea = %g, want %g", got, tt.want)
+			}
+		})
+	}
+}
