@@ -1,0 +1,594 @@
+{
+  "Version": "1.0",
+  "SRSName": "urn:adv:crs:ETRS89_UTM32*DE_DHHN2016_NH",
+  "CRS": {
+    "Raw": "urn:adv:crs:ETRS89_UTM32*DE_DHHN2016_NH",
+    "Code": 25832,
+    "IsYXOrder": false
+  },
+  "Buildings": [
+    {
+      "ID": "BLDG_PARTS",
+      "Class": "",
+      "Function": "31001_1000",
+      "Usage": "",
+      "MeasuredHeight": 0,
+      "HasMeasuredHeight": false,
+      "DerivedHeight": 0,
+      "LoD": "",
+      "Solid": null,
+      "MultiSurface": null,
+      "BoundedBy": null,
+      "Footprint": null,
+      "Parts": [
+        {
+          "ID": "PART_A",
+          "Class": "",
+          "Function": "31001_1000",
+          "Usage": "",
+          "MeasuredHeight": 12,
+          "HasMeasuredHeight": true,
+          "DerivedHeight": 0,
+          "LoD": "2",
+          "Solid": {
+            "Exterior": {
+              "Polygons": null
+            }
+          },
+          "MultiSurface": null,
+          "BoundedBy": [
+            {
+              "ID": "PA_GS",
+              "Type": "GroundSurface",
+              "Geometry": {
+                "Polygons": [
+                  {
+                    "Exterior": {
+                      "Points": [
+                        {
+                          "X": 550000,
+                          "Y": 5803000,
+                          "Z": 50
+                        },
+                        {
+                          "X": 550000,
+                          "Y": 5803010,
+                          "Z": 50
+                        },
+                        {
+                          "X": 550010,
+                          "Y": 5803010,
+                          "Z": 50
+                        },
+                        {
+                          "X": 550010,
+                          "Y": 5803000,
+                          "Z": 50
+                        },
+                        {
+                          "X": 550000,
+                          "Y": 5803000,
+                          "Z": 50
+                        }
+                      ]
+                    },
+                    "Interior": null
+                  }
+                ]
+              }
+            },
+            {
+              "ID": "PA_RS",
+              "Type": "RoofSurface",
+              "Geometry": {
+                "Polygons": [
+                  {
+                    "Exterior": {
+                      "Points": [
+                        {
+                          "X": 550000,
+                          "Y": 5803000,
+                          "Z": 62
+                        },
+                        {
+                          "X": 550010,
+                          "Y": 5803000,
+                          "Z": 62
+                        },
+                        {
+                          "X": 550010,
+                          "Y": 5803010,
+                          "Z": 62
+                        },
+                        {
+                          "X": 550000,
+                          "Y": 5803010,
+                          "Z": 62
+                        },
+                        {
+                          "X": 550000,
+                          "Y": 5803000,
+                          "Z": 62
+                        }
+                      ]
+                    },
+                    "Interior": null
+                  }
+                ]
+              }
+            },
+            {
+              "ID": "PA_WS",
+              "Type": "WallSurface",
+              "Geometry": {
+                "Polygons": [
+                  {
+                    "Exterior": {
+                      "Points": [
+                        {
+                          "X": 550000,
+                          "Y": 5803000,
+                          "Z": 50
+                        },
+                        {
+                          "X": 550010,
+                          "Y": 5803000,
+                          "Z": 50
+                        },
+                        {
+                          "X": 550010,
+                          "Y": 5803000,
+                          "Z": 62
+                        },
+                        {
+                          "X": 550000,
+                          "Y": 5803000,
+                          "Z": 62
+                        },
+                        {
+                          "X": 550000,
+                          "Y": 5803000,
+                          "Z": 50
+                        }
+                      ]
+                    },
+                    "Interior": null
+                  }
+                ]
+              }
+            }
+          ],
+          "Footprint": {
+            "Exterior": {
+              "Points": [
+                {
+                  "X": 550000,
+                  "Y": 5803000,
+                  "Z": 0
+                },
+                {
+                  "X": 550000,
+                  "Y": 5803010,
+                  "Z": 0
+                },
+                {
+                  "X": 550010,
+                  "Y": 5803010,
+                  "Z": 0
+                },
+                {
+                  "X": 550010,
+                  "Y": 5803000,
+                  "Z": 0
+                },
+                {
+                  "X": 550000,
+                  "Y": 5803000,
+                  "Z": 0
+                }
+              ]
+            },
+            "Interior": null
+          },
+          "Parts": null
+        },
+        {
+          "ID": "PART_B",
+          "Class": "",
+          "Function": "31001_2000",
+          "Usage": "",
+          "MeasuredHeight": 6.5,
+          "HasMeasuredHeight": true,
+          "DerivedHeight": 0,
+          "LoD": "2",
+          "Solid": {
+            "Exterior": {
+              "Polygons": null
+            }
+          },
+          "MultiSurface": null,
+          "BoundedBy": [
+            {
+              "ID": "PB_GS",
+              "Type": "GroundSurface",
+              "Geometry": {
+                "Polygons": [
+                  {
+                    "Exterior": {
+                      "Points": [
+                        {
+                          "X": 550010,
+                          "Y": 5803000,
+                          "Z": 50
+                        },
+                        {
+                          "X": 550010,
+                          "Y": 5803008,
+                          "Z": 50
+                        },
+                        {
+                          "X": 550016,
+                          "Y": 5803008,
+                          "Z": 50
+                        },
+                        {
+                          "X": 550016,
+                          "Y": 5803000,
+                          "Z": 50
+                        },
+                        {
+                          "X": 550010,
+                          "Y": 5803000,
+                          "Z": 50
+                        }
+                      ]
+                    },
+                    "Interior": null
+                  }
+                ]
+              }
+            },
+            {
+              "ID": "PB_RS",
+              "Type": "RoofSurface",
+              "Geometry": {
+                "Polygons": [
+                  {
+                    "Exterior": {
+                      "Points": [
+                        {
+                          "X": 550010,
+                          "Y": 5803000,
+                          "Z": 56.5
+                        },
+                        {
+                          "X": 550016,
+                          "Y": 5803000,
+                          "Z": 56.5
+                        },
+                        {
+                          "X": 550016,
+                          "Y": 5803008,
+                          "Z": 56.5
+                        },
+                        {
+                          "X": 550010,
+                          "Y": 5803008,
+                          "Z": 56.5
+                        },
+                        {
+                          "X": 550010,
+                          "Y": 5803000,
+                          "Z": 56.5
+                        }
+                      ]
+                    },
+                    "Interior": null
+                  }
+                ]
+              }
+            },
+            {
+              "ID": "PB_WS",
+              "Type": "WallSurface",
+              "Geometry": {
+                "Polygons": [
+                  {
+                    "Exterior": {
+                      "Points": [
+                        {
+                          "X": 550010,
+                          "Y": 5803000,
+                          "Z": 50
+                        },
+                        {
+                          "X": 550016,
+                          "Y": 5803000,
+                          "Z": 50
+                        },
+                        {
+                          "X": 550016,
+                          "Y": 5803000,
+                          "Z": 56.5
+                        },
+                        {
+                          "X": 550010,
+                          "Y": 5803000,
+                          "Z": 56.5
+                        },
+                        {
+                          "X": 550010,
+                          "Y": 5803000,
+                          "Z": 50
+                        }
+                      ]
+                    },
+                    "Interior": null
+                  }
+                ]
+              }
+            }
+          ],
+          "Footprint": {
+            "Exterior": {
+              "Points": [
+                {
+                  "X": 550010,
+                  "Y": 5803000,
+                  "Z": 0
+                },
+                {
+                  "X": 550010,
+                  "Y": 5803008,
+                  "Z": 0
+                },
+                {
+                  "X": 550016,
+                  "Y": 5803008,
+                  "Z": 0
+                },
+                {
+                  "X": 550016,
+                  "Y": 5803000,
+                  "Z": 0
+                },
+                {
+                  "X": 550010,
+                  "Y": 5803000,
+                  "Z": 0
+                }
+              ]
+            },
+            "Interior": null
+          },
+          "Parts": null
+        }
+      ]
+    },
+    {
+      "ID": "BLDG_PLAIN",
+      "Class": "",
+      "Function": "31001_1010",
+      "Usage": "",
+      "MeasuredHeight": 8,
+      "HasMeasuredHeight": true,
+      "DerivedHeight": 0,
+      "LoD": "2",
+      "Solid": {
+        "Exterior": {
+          "Polygons": null
+        }
+      },
+      "MultiSurface": null,
+      "BoundedBy": [
+        {
+          "ID": "PL_GS",
+          "Type": "GroundSurface",
+          "Geometry": {
+            "Polygons": [
+              {
+                "Exterior": {
+                  "Points": [
+                    {
+                      "X": 550030,
+                      "Y": 5803040,
+                      "Z": 50
+                    },
+                    {
+                      "X": 550030,
+                      "Y": 5803042,
+                      "Z": 50
+                    },
+                    {
+                      "X": 550032,
+                      "Y": 5803042,
+                      "Z": 50
+                    },
+                    {
+                      "X": 550032,
+                      "Y": 5803040,
+                      "Z": 50
+                    },
+                    {
+                      "X": 550030,
+                      "Y": 5803040,
+                      "Z": 50
+                    }
+                  ]
+                },
+                "Interior": null
+              },
+              {
+                "Exterior": {
+                  "Points": [
+                    {
+                      "X": 550040,
+                      "Y": 5803040,
+                      "Z": 50
+                    },
+                    {
+                      "X": 550040,
+                      "Y": 5803050,
+                      "Z": 50
+                    },
+                    {
+                      "X": 550050,
+                      "Y": 5803050,
+                      "Z": 50
+                    },
+                    {
+                      "X": 550050,
+                      "Y": 5803040,
+                      "Z": 50
+                    },
+                    {
+                      "X": 550040,
+                      "Y": 5803040,
+                      "Z": 50
+                    }
+                  ]
+                },
+                "Interior": [
+                  {
+                    "Points": [
+                      {
+                        "X": 550044,
+                        "Y": 5803044,
+                        "Z": 50
+                      },
+                      {
+                        "X": 550046,
+                        "Y": 5803044,
+                        "Z": 50
+                      },
+                      {
+                        "X": 550046,
+                        "Y": 5803046,
+                        "Z": 50
+                      },
+                      {
+                        "X": 550044,
+                        "Y": 5803046,
+                        "Z": 50
+                      },
+                      {
+                        "X": 550044,
+                        "Y": 5803044,
+                        "Z": 50
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "ID": "PL_RS",
+          "Type": "RoofSurface",
+          "Geometry": {
+            "Polygons": [
+              {
+                "Exterior": {
+                  "Points": [
+                    {
+                      "X": 550040,
+                      "Y": 5803040,
+                      "Z": 58
+                    },
+                    {
+                      "X": 550050,
+                      "Y": 5803040,
+                      "Z": 58
+                    },
+                    {
+                      "X": 550050,
+                      "Y": 5803050,
+                      "Z": 58
+                    },
+                    {
+                      "X": 550040,
+                      "Y": 5803050,
+                      "Z": 58
+                    },
+                    {
+                      "X": 550040,
+                      "Y": 5803040,
+                      "Z": 58
+                    }
+                  ]
+                },
+                "Interior": null
+              }
+            ]
+          }
+        }
+      ],
+      "Footprint": {
+        "Exterior": {
+          "Points": [
+            {
+              "X": 550040,
+              "Y": 5803040,
+              "Z": 0
+            },
+            {
+              "X": 550040,
+              "Y": 5803050,
+              "Z": 0
+            },
+            {
+              "X": 550050,
+              "Y": 5803050,
+              "Z": 0
+            },
+            {
+              "X": 550050,
+              "Y": 5803040,
+              "Z": 0
+            },
+            {
+              "X": 550040,
+              "Y": 5803040,
+              "Z": 0
+            }
+          ]
+        },
+        "Interior": [
+          {
+            "Points": [
+              {
+                "X": 550044,
+                "Y": 5803044,
+                "Z": 0
+              },
+              {
+                "X": 550046,
+                "Y": 5803044,
+                "Z": 0
+              },
+              {
+                "X": 550046,
+                "Y": 5803046,
+                "Z": 0
+              },
+              {
+                "X": 550044,
+                "Y": 5803046,
+                "Z": 0
+              },
+              {
+                "X": 550044,
+                "Y": 5803044,
+                "Z": 0
+              }
+            ]
+          }
+        ]
+      },
+      "Parts": null
+    }
+  ],
+  "Terrains": null,
+  "GenericObjects": null
+}

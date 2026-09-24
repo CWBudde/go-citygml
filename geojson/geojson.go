@@ -12,6 +12,7 @@ const (
 	typeFeatureCollection = "FeatureCollection"
 	typePolygon           = "Polygon"
 	typeMultiPolygon      = "MultiPolygon"
+	typeBuildingPart      = "BuildingPart"
 )
 
 // Geometry represents a GeoJSON geometry object.
@@ -168,12 +169,14 @@ func TerrainFeature(t *types.Terrain) Feature {
 }
 
 // FromDocument converts a full Document to a GeoJSON FeatureCollection.
-// Buildings and terrain objects are all included as features.
+// Buildings, building parts and terrain objects are all included as features.
+// Each building part follows its parent as its own feature, with properties
+// "type": "BuildingPart" and "parent" set to the parent's ID.
 func FromDocument(doc *types.Document) *FeatureCollection {
 	fc := NewFeatureCollection()
 
 	for i := range doc.Buildings {
-		fc.Features = append(fc.Features, BuildingFeature(&doc.Buildings[i]))
+		fc.Features = appendBuildingFeatures(fc.Features, &doc.Buildings[i], "")
 	}
 
 	for i := range doc.Terrains {
@@ -181,4 +184,21 @@ func FromDocument(doc *types.Document) *FeatureCollection {
 	}
 
 	return fc
+}
+
+// appendBuildingFeatures appends the feature for b followed by the features
+// of its parts, depth-first. parentID is empty for a top-level building.
+func appendBuildingFeatures(features []Feature, b *types.Building, parentID string) []Feature {
+	f := BuildingFeature(b)
+	if parentID != "" {
+		f.Properties["type"] = typeBuildingPart
+		f.Properties["parent"] = parentID
+	}
+
+	features = append(features, f)
+	for i := range b.Parts {
+		features = appendBuildingFeatures(features, &b.Parts[i], b.ID)
+	}
+
+	return features
 }

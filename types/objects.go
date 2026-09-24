@@ -21,7 +21,7 @@ type CityObject struct {
 	Type string
 }
 
-// Building represents a parsed CityGML building.
+// Building represents a parsed CityGML building or building part.
 type Building struct {
 	// ID is the gml:id of the building.
 	ID string
@@ -57,6 +57,15 @@ type Building struct {
 
 	// Footprint is a 2D polygon derived from the 3D geometry.
 	Footprint *Polygon
+
+	// Parts contains the building's BuildingParts (bldg:consistsOfBuildingPart
+	// in CityGML 1.0/2.0, bldg:buildingPart in 3.0), in document order. Each
+	// part is decoded like a building: it has its own ID, attributes,
+	// measured or derived height, geometry, semantic surfaces, footprint and,
+	// possibly, nested Parts. A building made of parts often carries no
+	// geometry or height of its own, so consumers wanting every volume should
+	// visit the parts too (see helpers.FlattenBuildings).
+	Parts []Building
 }
 
 // Terrain represents a parsed CityGML terrain surface.

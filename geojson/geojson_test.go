@@ -192,3 +192,46 @@ func TestPolygonGeometry_WithHoles(t *testing.T) {
 		t.Errorf("got %d rings, want 2", len(rings))
 	}
 }
+
+func TestFromDocument_BuildingParts(t *testing.T) {
+	square := types.Polygon{Exterior: types.Ring{Points: []types.Point{
+		{X: 0, Y: 0}, {X: 1, Y: 0}, {X: 1, Y: 1}, {X: 0, Y: 0},
+	}}}
+
+	doc := &types.Document{Buildings: []types.Building{{
+		ID: "B",
+		Parts: []types.Building{
+			{ID: "P1", Footprint: &square, Parts: []types.Building{{ID: "P1a", Footprint: &square}}},
+			{ID: "P2", Footprint: &square},
+		},
+	}}}
+
+	fc := FromDocument(doc)
+
+	want := []struct{ id, typ, parent string }{
+		{"B", "Building", ""},
+		{"P1", typeBuildingPart, "B"},
+		{"P1a", typeBuildingPart, "P1"},
+		{"P2", typeBuildingPart, "B"},
+	}
+
+	if len(fc.Features) != len(want) {
+		t.Fatalf("got %d features, want %d", len(fc.Features), len(want))
+	}
+
+	for i, w := range want {
+		f := fc.Features[i]
+		if f.ID != w.id || f.Properties["type"] != w.typ {
+			t.Errorf("feature %d = %q/%v, want %q/%q", i, f.ID, f.Properties["type"], w.id, w.typ)
+		}
+
+		parent, _ := f.Properties["parent"].(string)
+		if parent != w.parent {
+			t.Errorf("feature %s parent = %q, want %q", f.ID, parent, w.parent)
+		}
+	}
+
+	if fc.Features[0].Geometry != nil {
+		t.Error("parent without own geometry should have a null geometry")
+	}
+}

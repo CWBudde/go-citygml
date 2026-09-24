@@ -31,6 +31,10 @@ func TestSnapshot_CityGML30(t *testing.T) {
 	testSnapshot(t, "../testdata/citygml30_building.gml", "../testdata/golden/citygml30_building.json")
 }
 
+func TestSnapshot_CityGML10BuildingParts(t *testing.T) {
+	testSnapshot(t, "../testdata/citygml10_building_parts.gml", "../testdata/golden/citygml10_building_parts.json")
+}
+
 func TestSnapshot_URN_CRS(t *testing.T) {
 	testSnapshot(t, "../testdata/citygml20_urn_crs.gml", "../testdata/golden/citygml20_urn_crs.json")
 }

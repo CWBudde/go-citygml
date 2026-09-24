@@ -19,6 +19,7 @@ const (
 	lod1MultiSurfaceElement = "lod1MultiSurface"
 	lod2MultiSurfaceElement = "lod2MultiSurface"
 	multiSurfaceElement     = "MultiSurface"
+	buildingPartElement     = "BuildingPart"
 )
 
 // IsBuildingElement returns true if the element is a recognized building element.
@@ -27,8 +28,9 @@ func IsBuildingElement(elem *xmlscan.Element) bool {
 	return ns == xmlscan.NSCityGML10Bldg || ns == xmlscan.NSCityGML20Bldg || ns == xmlscan.NSCityGML30Bldg
 }
 
-// Building decodes a Building element from the scanner.
-// The scanner must be positioned just after the Building StartElement.
+// Building decodes a Building or BuildingPart element from the scanner,
+// including its nested BuildingParts.
+// The scanner must be positioned just after the element's StartElement.
 func Building(elem *xmlscan.Element, sc *xmlscan.Scanner) (types.Building, error) {
 	b := types.Building{
 		ID: elem.ID,
@@ -149,6 +151,18 @@ func decodeBuildingChild(se xml.StartElement, sc *xmlscan.Scanner, b *types.Buil
 		b.LoD = types.LoD2
 		b.MultiSurface = ms
 
+	case "consistsOfBuildingPart", "buildingPart":
+		part, err := decodeBuildingPart(sc)
+		if err != nil {
+			return fmt.Errorf("decode: %s: %w", local, err)
+		}
+
+		*depth--
+
+		if part != nil {
+			b.Parts = append(b.Parts, *part)
+		}
+
 	case "boundedBy":
 		surf, err := decodeBoundedBy(sc)
 		if err != nil {
@@ -171,6 +185,47 @@ func decodeBuildingChild(se xml.StartElement, sc *xmlscan.Scanner, b *types.Buil
 	}
 
 	return nil
+}
+
+// decodeBuildingPart reads a BuildingPart inside a consistsOfBuildingPart
+// (CityGML 1.0/2.0) or buildingPart (CityGML 3.0) wrapper. The part is decoded
+// by Building itself, so it gets the same attributes, geometry and nested
+// parts as a building. A wrapper that only references a part by xlink:href,
+// or holds no BuildingPart, yields nil.
+func decodeBuildingPart(sc *xmlscan.Scanner) (*types.Building, error) {
+	var part *types.Building
+
+	depth := 1
+	for depth > 0 {
+		tok, err := sc.Token()
+		if err != nil {
+			return nil, err
+		}
+
+		switch t := tok.(type) {
+		case xml.StartElement:
+			if t.Name.Local != buildingPartElement || part != nil {
+				err := sc.Skip()
+				if err != nil {
+					return nil, err
+				}
+
+				continue
+			}
+
+			p, err := Building(sc.WrapElement(t), sc)
+			if err != nil {
+				return nil, fmt.Errorf("BuildingPart %s: %w", p.ID, err)
+			}
+
+			part = &p
+
+		case xml.EndElement:
+			depth--
+		}
+	}
+
+	return part, nil
 }
 
 // decodeLodSolid reads a Solid inside a lodXSolid wrapper.

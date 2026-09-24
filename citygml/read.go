@@ -114,4 +114,8 @@ func postProcessBuilding(b *types.Building, opts Options) {
 	if opts.deriveFootprints() {
 		b.Footprint = gml.DeriveFootprint(b.Solid, b.MultiSurface, b.BoundedBy)
 	}
+
+	for i := range b.Parts {
+		postProcessBuilding(&b.Parts[i], opts)
+	}
 }
