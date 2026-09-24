@@ -67,6 +67,49 @@ func TestParse(t *testing.T) {
 			wantCode: 25833,
 		},
 		{
+			name:     "ADV UTM32 DHHN2016 compound CRS",
+			input:    "urn:adv:crs:ETRS89_UTM32*DE_DHHN2016_NH",
+			wantCode: 25832,
+		},
+		{
+			name:     "EPSG short compound form",
+			input:    "EPSG:25832+7837",
+			wantCode: 25832,
+		},
+		{
+			name:     "OGC compound URN",
+			input:    "urn:ogc:def:crs,crs:EPSG::25832,crs:EPSG::7837",
+			wantCode: 25832,
+		},
+		{
+			name:     "OGC compound URN with version",
+			input:    "urn:ogc:def:crs,crs:EPSG:6.12:25833,crs:EPSG:6.12:5783",
+			wantCode: 25833,
+		},
+		{
+			name:     "OGC compound HTTP URI",
+			input:    "http://www.opengis.net/def/crs-compound?1=http://www.opengis.net/def/crs/EPSG/0/25832&2=http://www.opengis.net/def/crs/EPSG/0/7837",
+			wantCode: 25832,
+		},
+		{
+			name:     "OGC compound HTTP URI with geographic horizontal",
+			input:    "https://www.opengis.net/def/crs-compound?1=https://www.opengis.net/def/crs/EPSG/0/4258&2=https://www.opengis.net/def/crs/EPSG/0/7837",
+			wantCode: 4258,
+			wantYX:   true,
+		},
+		{
+			name:      "EPSG short form with malformed vertical",
+			input:     "EPSG:25832+",
+			wantCode:  0,
+			wantEmpty: true,
+		},
+		{
+			name:      "OGC compound URN without EPSG component",
+			input:     "urn:ogc:def:crs,crs:FOO::1",
+			wantCode:  0,
+			wantEmpty: true,
+		},
+		{
 			name:      "unrecognized format",
 			input:     "some-unknown-crs",
 			wantCode:  0,

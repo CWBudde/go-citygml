@@ -38,13 +38,28 @@ func ParsePos(text string) (types.Point, types.Dimensionality, error) {
 // dim specifies the coordinate dimensionality (2 or 3). If dim is 0, it is
 // inferred: 3 if the total count is divisible by 3, otherwise 2.
 func ParsePosList(text string, dim types.Dimensionality) ([]types.Point, types.Dimensionality, error) {
-	fields := strings.Fields(text)
+	return parsePosListFields(strings.Fields(text), dim, 0)
+}
+
+// parsePosListFields parses already-split posList values. dim is an
+// authoritative dimensionality (an srsDimension declared on the posList or an
+// enclosing geometry); when it is 0, hint is tried next, but only if the value
+// count is divisible by it, and the divisibility heuristic is the last resort.
+func parsePosListFields(fields []string, dim, hint types.Dimensionality) ([]types.Point, types.Dimensionality, error) {
 	if len(fields) == 0 {
 		return nil, 0, errors.New("gml: empty posList")
 	}
 
+	if dim == 0 && hint > 0 && len(fields)%int(hint) == 0 {
+		dim = hint
+	}
+
 	if dim == 0 {
 		dim = inferDimensionality(len(fields))
+	}
+
+	if dim != types.Dim2D && dim != types.Dim3D {
+		return nil, 0, fmt.Errorf("gml: unsupported srsDimension %d, expected 2 or 3", dim)
 	}
 
 	d := int(dim)
@@ -75,6 +90,21 @@ func ParsePosList(text string, dim types.Dimensionality) ([]types.Point, types.D
 	}
 
 	return points, dim, nil
+}
+
+// parsePosDeclared parses a gml:pos and, when dim is non-zero (a declared
+// srsDimension), checks that the value count matches it.
+func parsePosDeclared(text string, dim types.Dimensionality) (types.Point, types.Dimensionality, error) {
+	pt, d, err := ParsePos(text)
+	if err != nil {
+		return types.Point{}, 0, err
+	}
+
+	if dim != 0 && d != dim {
+		return types.Point{}, 0, fmt.Errorf("gml: pos has %d values, but srsDimension is %d", d, dim)
+	}
+
+	return pt, d, nil
 }
 
 func inferDimensionality(count int) types.Dimensionality {

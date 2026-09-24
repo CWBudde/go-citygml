@@ -19,7 +19,8 @@
       "Solid": null,
       "MultiSurface": null,
       "BoundedBy": null,
-      "Footprint": null
+      "Footprint": null,
+      "Parts": null
     }
   ],
   "Terrains": null,

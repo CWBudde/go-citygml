@@ -14,6 +14,10 @@ func TestIsBuildingElement(t *testing.T) {
 		local string
 		want  bool
 	}{
+		{xmlscan.NSCityGML10Bldg, "Building", true},
+		{xmlscan.NSCityGML10Bldg, "BuildingPart", false},
+		{xmlscan.NSCityGML10Bldg, "BuildingInstallation", false},
+		{xmlscan.NSCityGML20Bldg, "BuildingInstallation", false},
 		{xmlscan.NSCityGML20Bldg, "Building", true},
 		{xmlscan.NSCityGML30Bldg, "Building", true},
 		{xmlscan.NSCityGML20Dem, "ReliefFeature", false},
@@ -407,6 +411,34 @@ func TestBuilding_CityGML30(t *testing.T) {
 
 	if b.MeasuredHeight != 20.0 {
 		t.Errorf("MeasuredHeight = %g, want 20.0", b.MeasuredHeight)
+	}
+}
+
+const buildingCityGML10 = `<?xml version="1.0" encoding="UTF-8"?>
+<core:CityModel xmlns:core="http://www.opengis.net/citygml/1.0"
+                xmlns:gml="http://www.opengis.net/gml"
+                xmlns:bldg="http://www.opengis.net/citygml/building/1.0">
+  <core:cityObjectMember>
+    <bldg:Building gml:id="B10">
+      <bldg:function>31001_1000</bldg:function>
+      <bldg:measuredHeight uom="urn:adv:uom:m">16.5</bldg:measuredHeight>
+    </bldg:Building>
+  </core:cityObjectMember>
+</core:CityModel>`
+
+func TestBuilding_CityGML10(t *testing.T) {
+	b := decodeTestBuilding(t, buildingCityGML10)
+
+	if b.ID != "B10" {
+		t.Errorf("ID = %q, want B10", b.ID)
+	}
+
+	if b.Function != "31001_1000" {
+		t.Errorf("Function = %q, want 31001_1000", b.Function)
+	}
+
+	if !b.HasMeasuredHeight || b.MeasuredHeight != 16.5 {
+		t.Errorf("MeasuredHeight = %g (has=%v), want 16.5", b.MeasuredHeight, b.HasMeasuredHeight)
 	}
 }
 

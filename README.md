@@ -5,17 +5,18 @@ A pure Go library for reading and normalizing [CityGML](https://www.ogc.org/stan
 ## What it does
 
 - Parses CityGML XML with full namespace awareness
-- Decodes GML geometry (pos, posList, LinearRing, Polygon, MultiSurface, Solid)
+- Decodes GML geometry (pos, posList, LinearRing, Polygon, MultiSurface, Solid), honouring `srsDimension`
 - Maps semantic objects (buildings, terrain, surfaces) into a normalized Go model
 - Extracts heights (measured or Z-extent derived) and 2D footprints
 - Validates geometry and structure with clear error reporting
 
 ## Supported versions
 
-| CityGML version | Status    |
-| --------------- | --------- |
-| 2.0             | Supported |
-| 3.0             | Supported |
+| CityGML version | Status                                          |
+| --------------- | ----------------------------------------------- |
+| 1.0             | Supported (e.g. AdV/LGLN LoD2 tiles, GML 3.1.1) |
+| 2.0             | Supported                                       |
+| 3.0             | Supported                                       |
 
 ## Supported building patterns
 
@@ -28,9 +29,9 @@ A pure Go library for reading and normalizing [CityGML](https://www.ogc.org/stan
 | Bounded surfaces (GroundSurface, RoofSurface, WallSurface, etc.) | Supported         |
 | `measuredHeight`                                                 | Supported         |
 | Height from Z extents (fallback)                                 | Supported         |
-| 2D footprint derivation                                          | Supported         |
+| 2D footprint derivation (largest GroundSurface polygon)          | Supported         |
 | `class`, `function`, `usage` attributes                          | Supported         |
-| BuildingPart                                                     | Not yet supported |
+| BuildingPart (`consistsOfBuildingPart`, 3.0 `buildingPart`)      | Supported         |
 | lod3/lod4 geometry                                               | Not yet supported |
 | BuildingInstallation                                             | Not yet supported |
 
@@ -75,6 +76,23 @@ if err != nil {
 
 for _, b := range doc.Buildings {
     fmt.Printf("Building %s: height=%.1f\n", b.ID, b.MeasuredHeight)
+}
+```
+
+### Building parts
+
+A building modelled as `BuildingPart`s often has no height or geometry of its
+own; each part is decoded like a building into `Building.Parts` (recursively),
+with its own ID, attributes, height, surfaces and footprint.
+
+```go
+import "github.com/cwbudde/go-citygml/helpers"
+
+for _, b := range helpers.FlattenBuildings(doc) { // buildings and parts, depth-first
+    h, ok := helpers.BuildingHeight(b)
+    if ok && b.Footprint != nil {
+        fmt.Printf("%s: %.1fm, %d parts\n", b.ID, h, len(b.Parts))
+    }
 }
 ```
 

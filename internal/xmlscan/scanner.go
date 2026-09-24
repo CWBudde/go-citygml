@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 )
 
@@ -38,6 +39,20 @@ type Scanner struct {
 
 	// DetectedVersion is set when the root element's namespaces are inspected.
 	DetectedVersion Version
+
+	// dimScopes records every open element that declares srsDimension,
+	// innermost last, so geometry parsers can honour an inherited value.
+	dimScopes []dimScope
+
+	// defaultDim is a document-wide srsDimension hint (from the root
+	// gml:Envelope). It is only a hint: see DefaultSRSDimension.
+	defaultDim int
+}
+
+// dimScope is an open element that declared an srsDimension attribute.
+type dimScope struct {
+	depth int // len(path) of the declaring element
+	dim   int
 }
 
 // NewScanner creates a Scanner from the given reader.
@@ -79,18 +94,65 @@ func (s *Scanner) Token() (xml.Token, error) {
 	case xml.StartElement:
 		s.path = append(s.path, t.Name.Local)
 
+		if d := srsDimensionAttr(t); d > 0 {
+			s.dimScopes = append(s.dimScopes, dimScope{depth: len(s.path), dim: d})
+		}
+
 		// Detect version from root element namespaces.
 		if len(s.path) == 1 && s.DetectedVersion == VersionUnknown {
 			s.detectVersionFromElement(t)
 		}
 
 	case xml.EndElement:
+		if n := len(s.dimScopes); n > 0 && s.dimScopes[n-1].depth == len(s.path) {
+			s.dimScopes = s.dimScopes[:n-1]
+		}
+
 		if len(s.path) > 0 {
 			s.path = s.path[:len(s.path)-1]
 		}
 	}
 
 	return tok, nil
+}
+
+// SRSDimension returns the srsDimension declared on the most recently opened
+// element that is still open, or on its nearest ancestor that declares one.
+// GML lets srsDimension be set on a posList/pos or on any enclosing geometry.
+// Returns 0 when no open element declares it.
+func (s *Scanner) SRSDimension() int {
+	if n := len(s.dimScopes); n > 0 {
+		return s.dimScopes[n-1].dim
+	}
+
+	return 0
+}
+
+// DefaultSRSDimension returns the document-wide srsDimension hint taken from
+// the root gml:Envelope (or its corners), or 0 if none was declared. Unlike
+// SRSDimension it does not apply to geometry by GML rules, so callers should
+// treat it as a hint and fall back when the coordinate count disagrees.
+func (s *Scanner) DefaultSRSDimension() int {
+	return s.defaultDim
+}
+
+// srsDimensionAttr returns the positive integer value of an srsDimension
+// attribute on se, or 0 if absent or not a positive integer.
+func srsDimensionAttr(se xml.StartElement) int {
+	for _, attr := range se.Attr {
+		if attr.Name.Local != "srsDimension" {
+			continue
+		}
+
+		d, err := strconv.Atoi(strings.TrimSpace(attr.Value))
+		if err != nil || d <= 0 {
+			return 0
+		}
+
+		return d
+	}
+
+	return 0
 }
 
 // StartElement advances past non-element tokens and returns the next StartElement.
@@ -167,6 +229,13 @@ func (s *Scanner) WrapElement(se xml.StartElement) *Element {
 	}
 
 	return e
+}
+
+// setDefaultSRSDimension records the document-wide srsDimension hint once.
+func (s *Scanner) setDefaultSRSDimension(dim int) {
+	if s.defaultDim == 0 && dim > 0 {
+		s.defaultDim = dim
+	}
 }
 
 // detectVersionFromElement inspects namespace declarations on the root element.

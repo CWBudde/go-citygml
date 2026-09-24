@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/cwbudde/go-citygml/internal/xmlscan"
 	"github.com/cwbudde/go-citygml/types"
@@ -37,6 +38,8 @@ func ParseLinearRing(sc *xmlscan.Scanner) (types.Ring, types.Dimensionality, err
 
 			switch t.Name.Local {
 			case "pos":
+				declared := types.Dimensionality(sc.SRSDimension())
+
 				text, err := sc.CharData()
 				if err != nil {
 					return types.Ring{}, 0, wrapScannerError("LinearRing pos char data", err)
@@ -44,7 +47,7 @@ func ParseLinearRing(sc *xmlscan.Scanner) (types.Ring, types.Dimensionality, err
 
 				depth-- // CharData consumed the EndElement
 
-				pt, d, err := ParsePos(text)
+				pt, d, err := parsePosDeclared(text, declared)
 				if err != nil {
 					return types.Ring{}, 0, fmt.Errorf("gml: LinearRing pos: %w", err)
 				}
@@ -56,6 +59,10 @@ func ParseLinearRing(sc *xmlscan.Scanner) (types.Ring, types.Dimensionality, err
 				points = append(points, pt)
 
 			case "posList":
+				// Read the declared dimension before CharData closes the element.
+				declared := types.Dimensionality(sc.SRSDimension())
+				hint := types.Dimensionality(sc.DefaultSRSDimension())
+
 				text, err := sc.CharData()
 				if err != nil {
 					return types.Ring{}, 0, wrapScannerError("LinearRing posList char data", err)
@@ -63,7 +70,7 @@ func ParseLinearRing(sc *xmlscan.Scanner) (types.Ring, types.Dimensionality, err
 
 				depth-- // CharData consumed the EndElement
 
-				pts, d, err := ParsePosList(text, 0)
+				pts, d, err := parsePosListFields(strings.Fields(text), declared, hint)
 				if err != nil {
 					return types.Ring{}, 0, fmt.Errorf("gml: LinearRing posList: %w", err)
 				}

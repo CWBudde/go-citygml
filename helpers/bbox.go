@@ -16,7 +16,8 @@ type BBox struct {
 	Empty bool
 }
 
-// DocumentBBox computes the axis-aligned bounding box over all geometry in the document.
+// DocumentBBox computes the axis-aligned bounding box over all geometry in the
+// document, including building parts.
 func DocumentBBox(doc *types.Document) BBox {
 	bb := BBox{
 		MinX:  math.MaxFloat64,
@@ -59,8 +60,7 @@ func DocumentBBox(doc *types.Document) BBox {
 		}
 	}
 
-	for i := range doc.Buildings {
-		b := &doc.Buildings[i]
+	for _, b := range FlattenBuildings(doc) {
 		if b.Solid != nil {
 			visitMultiSurface(&b.Solid.Exterior, visit)
 		}

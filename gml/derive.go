@@ -48,17 +48,16 @@ func DeriveHeight(solid *types.Solid, ms *types.MultiSurface, bounded []types.Su
 	return maxZ - minZ
 }
 
-// DeriveFootprint projects 3D geometry onto the XY plane and returns
-// the polygon with the largest area as the footprint candidate.
-// It considers ground surfaces first (from bounded), then falls back
-// to the lowest-Z polygon from the solid or multi-surface.
+// DeriveFootprint projects 3D geometry onto the XY plane and returns a 2D
+// footprint candidate. It considers every polygon of every GroundSurface in
+// bounded and returns the one with the largest planar area (exterior minus
+// holes), interior rings included. Without a usable GroundSurface it falls
+// back to the lowest-Z polygon from the solid or multi-surface.
 func DeriveFootprint(solid *types.Solid, ms *types.MultiSurface, bounded []types.Surface) *types.Polygon {
-	// Strategy 1: Use GroundSurface if available.
-	for _, surf := range bounded {
-		if surf.Type == groundSurfaceType && len(surf.Geometry.Polygons) > 0 {
-			proj := projectPolygon(surf.Geometry.Polygons[0])
-			return &proj
-		}
+	// Strategy 1: the largest GroundSurface polygon.
+	if ground := largestGroundPolygon(bounded); ground != nil {
+		proj := projectPolygon(*ground)
+		return &proj
 	}
 
 	// Strategy 2: Find the polygon with the lowest average Z (likely the footprint).
@@ -89,6 +88,60 @@ func DeriveFootprint(solid *types.Solid, ms *types.MultiSurface, bounded []types
 	proj := projectPolygon(allPolygons[bestIdx])
 
 	return &proj
+}
+
+// largestGroundPolygon returns the GroundSurface polygon with the largest
+// planar area, or nil if bounded has no GroundSurface polygon. Ties keep the
+// first polygon in document order.
+func largestGroundPolygon(bounded []types.Surface) *types.Polygon {
+	var best *types.Polygon
+
+	bestArea := -1.0
+
+	for i := range bounded {
+		if bounded[i].Type != groundSurfaceType {
+			continue
+		}
+
+		polys := bounded[i].Geometry.Polygons
+		for j := range polys {
+			if a := planarArea(polys[j]); a > bestArea {
+				bestArea = a
+				best = &polys[j]
+			}
+		}
+	}
+
+	return best
+}
+
+// planarArea returns the area of poly projected onto the XY plane: the
+// absolute shoelace area of the exterior ring minus that of each interior
+// ring. Z is ignored.
+func planarArea(poly types.Polygon) float64 {
+	area := ringArea(poly.Exterior)
+	for _, hole := range poly.Interior {
+		area -= ringArea(hole)
+	}
+
+	return math.Max(area, 0)
+}
+
+// ringArea returns the absolute XY shoelace area of a ring, closed or not.
+func ringArea(ring types.Ring) float64 {
+	pts := ring.Points
+	if len(pts) < 3 {
+		return 0
+	}
+
+	sum := 0.0
+
+	for i := range pts {
+		j := (i + 1) % len(pts)
+		sum += pts[i].X*pts[j].Y - pts[j].X*pts[i].Y
+	}
+
+	return math.Abs(sum) / 2
 }
 
 // projectPolygon projects a polygon onto the XY plane (Z=0).

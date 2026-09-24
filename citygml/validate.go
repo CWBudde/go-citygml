@@ -101,7 +101,11 @@ func validateDocumentMeta(doc *types.Document) []Finding {
 func validateBuilding(b *types.Building, path string) []Finding {
 	var findings []Finding
 
-	if !b.HasMeasuredHeight && b.DerivedHeight == 0 {
+	// A building composed of BuildingParts commonly keeps its height and
+	// geometry on the parts only; those are checked per part below.
+	hasParts := len(b.Parts) > 0
+
+	if !hasParts && !b.HasMeasuredHeight && b.DerivedHeight == 0 {
 		findings = append(findings, Finding{
 			Severity: SeverityWarning,
 			Path:     path,
@@ -109,7 +113,7 @@ func validateBuilding(b *types.Building, path string) []Finding {
 		})
 	}
 
-	if b.Solid == nil && b.MultiSurface == nil && len(b.BoundedBy) == 0 {
+	if !hasParts && b.Solid == nil && b.MultiSurface == nil && len(b.BoundedBy) == 0 {
 		findings = append(findings, Finding{
 			Severity: SeverityWarning,
 			Path:     path,
@@ -134,6 +138,11 @@ func validateBuilding(b *types.Building, path string) []Finding {
 		findings = append(findings, validateGeometryErrors(
 			gml.ValidateMultiSurface(surf.Geometry, surfPath),
 		)...)
+	}
+
+	for i := range b.Parts {
+		partPath := fmt.Sprintf("%s/Part[%d](%s)", path, i, b.Parts[i].ID)
+		findings = append(findings, validateBuilding(&b.Parts[i], partPath)...)
 	}
 
 	return findings

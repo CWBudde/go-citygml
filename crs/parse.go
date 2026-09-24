@@ -19,18 +19,30 @@ import (
 //   http://www.opengis.net/def/crs/EPSG/0/25832
 //   urn:adv:crs:ETRS89_UTM32*DE_DHHN92_NH  (German ADV compound CRS)
 //
+// Compound (horizontal + vertical) forms are also recognised; they resolve
+// to the horizontal component's code:
+//
+//   EPSG:25832+7837
+//   urn:ogc:def:crs,crs:EPSG::25832,crs:EPSG::7837
+//   http://www.opengis.net/def/crs-compound?1=http://www.opengis.net/def/crs/EPSG/0/25832&2=http://www.opengis.net/def/crs/EPSG/0/7837
+//
 // All are normalized to an EPSG integer code.
 
 var (
-	reEPSGShort = regexp.MustCompile(`^EPSG:(\d+)$`)
+	reEPSGShort = regexp.MustCompile(`^EPSG:(\d+)(?:\+\d+)?$`)
 	reURN       = regexp.MustCompile(`^urn:ogc:def:crs:EPSG:[^:]*:(\d+)$`)
 	reHTTP      = regexp.MustCompile(`^https?://www\.opengis\.net/def/crs/EPSG/\d+/(\d+)$`)
+	// OGC compound URN: urn:ogc:def:crs,crs:EPSG::<horizontal>,crs:EPSG::<vertical>.
+	reURNCompound = regexp.MustCompile(`^urn:ogc:def:crs,crs:EPSG:[^:,]*:(\d+)(?:,.*)?$`)
+	// OGC compound HTTP URI: the first component (1=) is the horizontal CRS.
+	reHTTPCompound = regexp.MustCompile(`^https?://www\.opengis\.net/def/crs-compound\?1=https?://www\.opengis\.net/def/crs/EPSG/\d+/(\d+)(?:&.*)?$`)
 	// German ADV CRS: urn:adv:crs:ETRS89_UTM<zone>[*<vertical>]
 	// ETRS89_UTM32 → EPSG:25832, ETRS89_UTM33 → EPSG:25833, etc.
 	reADVUTM = regexp.MustCompile(`^urn:adv:crs:ETRS89_UTM(\d+)`)
 )
 
 // Parse interprets an srsName string and returns structured CRS metadata.
+// For a compound CRS, Code is the horizontal component's EPSG code.
 // Returns a CRS with Code=0 if the format is not recognized.
 func Parse(srsName string) types.CRS {
 	c := types.CRS{Raw: srsName}
@@ -44,7 +56,7 @@ func Parse(srsName string) types.CRS {
 }
 
 func extractCode(s string) int {
-	for _, re := range []*regexp.Regexp{reEPSGShort, reURN, reHTTP} {
+	for _, re := range []*regexp.Regexp{reEPSGShort, reURN, reHTTP, reURNCompound, reHTTPCompound} {
 		if m := re.FindStringSubmatch(s); m != nil {
 			code, _ := strconv.Atoi(m[1])
 			return code

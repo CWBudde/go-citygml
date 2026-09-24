@@ -2,6 +2,18 @@ package xmlscan
 
 // Known namespace URIs for CityGML and related standards.
 const (
+	// NSCityGML10Core and related constants define CityGML 1.0 namespaces.
+	// CityGML 1.0 is encoded in GML 3.1.1 (NSGML31). Its building, relief
+	// and generics modules use the same element names as CityGML 2.0.
+	NSCityGML10Core = "http://www.opengis.net/citygml/1.0"
+	NSCityGML10Bldg = "http://www.opengis.net/citygml/building/1.0"
+	NSCityGML10Dem  = "http://www.opengis.net/citygml/relief/1.0"
+	NSCityGML10Tran = "http://www.opengis.net/citygml/transportation/1.0"
+	NSCityGML10Veg  = "http://www.opengis.net/citygml/vegetation/1.0"
+	NSCityGML10Gen  = "http://www.opengis.net/citygml/generics/1.0"
+	NSCityGML10App  = "http://www.opengis.net/citygml/appearance/1.0"
+	NSCityGML10Grp  = "http://www.opengis.net/citygml/cityobjectgroup/1.0"
+
 	// NSCityGML20Core and related constants define CityGML 2.0 namespaces.
 	NSCityGML20Core = "http://www.opengis.net/citygml/2.0"
 	NSCityGML20Bldg = "http://www.opengis.net/citygml/building/2.0"
@@ -29,12 +41,14 @@ type Version string
 
 const (
 	VersionUnknown Version = ""
+	Version10      Version = "1.0"
 	Version20      Version = "2.0"
 	Version30      Version = "3.0"
 )
 
 // coreNamespaceVersion maps core CityGML namespace URIs to their version.
 var coreNamespaceVersion = map[string]Version{
+	NSCityGML10Core: Version10,
 	NSCityGML20Core: Version20,
 	NSCityGML30Core: Version30,
 }
