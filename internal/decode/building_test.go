@@ -15,7 +15,9 @@ func TestIsBuildingElement(t *testing.T) {
 		want  bool
 	}{
 		{xmlscan.NSCityGML10Bldg, "Building", true},
-		{xmlscan.NSCityGML10Bldg, "BuildingPart", true},
+		{xmlscan.NSCityGML10Bldg, "BuildingPart", false},
+		{xmlscan.NSCityGML10Bldg, "BuildingInstallation", false},
+		{xmlscan.NSCityGML20Bldg, "BuildingInstallation", false},
 		{xmlscan.NSCityGML20Bldg, "Building", true},
 		{xmlscan.NSCityGML30Bldg, "Building", true},
 		{xmlscan.NSCityGML20Dem, "ReliefFeature", false},

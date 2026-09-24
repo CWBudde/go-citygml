@@ -19,13 +19,23 @@ const (
 	lod1MultiSurfaceElement = "lod1MultiSurface"
 	lod2MultiSurfaceElement = "lod2MultiSurface"
 	multiSurfaceElement     = "MultiSurface"
+	buildingElement         = "Building"
 	buildingPartElement     = "BuildingPart"
 )
 
-// IsBuildingElement returns true if the element is a recognized building element.
+// IsBuildingElement returns true if the element is a top-level Building.
+//
+// It checks the local name as well as the namespace: the building namespace
+// also holds features such as BuildingInstallation, which this decoder does
+// not model and must not turn into a Building. A BuildingPart is only valid
+// nested under consistsOfBuildingPart, where Building decodes it.
 func IsBuildingElement(elem *xmlscan.Element) bool {
 	ns := elem.Namespace()
-	return ns == xmlscan.NSCityGML10Bldg || ns == xmlscan.NSCityGML20Bldg || ns == xmlscan.NSCityGML30Bldg
+	if ns != xmlscan.NSCityGML10Bldg && ns != xmlscan.NSCityGML20Bldg && ns != xmlscan.NSCityGML30Bldg {
+		return false
+	}
+
+	return elem.LocalName() == buildingElement
 }
 
 // Building decodes a Building or BuildingPart element from the scanner,
